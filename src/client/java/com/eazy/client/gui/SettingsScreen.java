@@ -2,21 +2,23 @@ package com.eazy.client.gui;
 
 import com.eazy.client.core.EAzyModule;
 import com.eazy.client.core.ModuleManager;
+import com.eazy.client.modules.FpsProfileModule;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
+import java.util.List;
+
 /**
- * Aşama 1 için basit ayar ekranı: modül listesi + aç/kapat düğmeleri.
+ * Basit ayar ekranı: modül listesi + aç/kapat düğmeleri + (ayarı olan modüller için) "..." düğmesi.
  * Kategorili asıl menü Aşama 5'te yapılacak.
  */
 public class SettingsScreen extends Screen {
-	private static final int BUTTON_WIDTH = 200;
 	private static final int BUTTON_HEIGHT = 20;
-	private static final int GAP = 4;
-	private static final int TOP = 40;
-	private static final int BOTTOM_RESERVED = 36;
+	private static final int ROW = 24;
+	private static final int TOP = 36;
+	private static final int BOTTOM_RESERVED = 52;
 
 	private final Screen parent;
 
@@ -27,24 +29,32 @@ public class SettingsScreen extends Screen {
 
 	@Override
 	protected void init() {
-		int x = this.width / 2 - BUTTON_WIDTH / 2;
+		int x = this.width / 2 - 100;
 		int y = TOP;
 
 		for (EAzyModule module : ModuleManager.all()) {
 			if (y + BUTTON_HEIGHT > this.height - BOTTOM_RESERVED) {
 				break; // Ekrana sığmayanlar Aşama 5'teki kategorili menüde gösterilecek.
 			}
-			Button button = Button.builder(label(module), btn -> {
+			boolean hasSettings = module.settings().stream().anyMatch(s -> !s.isHidden());
+			int toggleWidth = hasSettings ? 170 : 200;
+
+			this.addRenderableWidget(Button.builder(label(module), btn -> {
 				ModuleManager.toggle(module);
 				btn.setMessage(label(module));
-			}).bounds(x, y, BUTTON_WIDTH, BUTTON_HEIGHT).build();
-			this.addRenderableWidget(button);
-			y += BUTTON_HEIGHT + GAP;
+			}).bounds(x, y, toggleWidth, BUTTON_HEIGHT).build());
+
+			if (hasSettings) {
+				this.addRenderableWidget(Button.builder(Component.translatable("eazy.button.settings"),
+								btn -> this.minecraft.gui.setScreen(new ModuleSettingsScreen(this, module)))
+						.bounds(x + 174, y, 26, BUTTON_HEIGHT).build());
+			}
+			y += ROW;
 		}
 
 		this.addRenderableWidget(
 				Button.builder(Component.translatable("eazy.button.done"), btn -> this.onClose())
-						.bounds(x, this.height - 28, BUTTON_WIDTH, BUTTON_HEIGHT)
+						.bounds(x, this.height - 28, 200, BUTTON_HEIGHT)
 						.build());
 	}
 
@@ -66,5 +76,12 @@ public class SettingsScreen extends Screen {
 		super.extractRenderState(graphics, mouseX, mouseY, delta);
 		String text = this.title.getString();
 		graphics.text(this.font, text, (this.width - this.font.width(text)) / 2, 20, 0xFFFFFFFF, true);
+
+		List<String> found = FpsProfileModule.detectedMods();
+		if (!found.isEmpty()) {
+			graphics.centeredText(this.font,
+					Component.translatable("eazy.fps.detected", String.join(", ", found)),
+					this.width / 2, this.height - 42, 0xFFAAAAAA);
+		}
 	}
 }

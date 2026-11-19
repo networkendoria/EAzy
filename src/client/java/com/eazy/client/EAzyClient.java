@@ -4,7 +4,10 @@ import com.eazy.client.core.ConfigManager;
 import com.eazy.client.core.ModuleManager;
 import com.eazy.client.gui.SettingsScreen;
 import com.eazy.client.input.EAzyKeys;
+import com.eazy.client.modules.FpsProfileModule;
+import com.eazy.client.modules.NoParticlesModule;
 import com.eazy.client.modules.TestModule;
+import com.eazy.client.modules.ZoomModule;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -15,7 +18,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * EAzy Client giriş noktası.
- * Aşama 1: altyapı (modül sistemi, ayarlar, tuşlar, basit ayar ekranı).
+ * Altyapı + modüller.
  */
 public final class EAzyClient implements ClientModInitializer {
 	public static final String MOD_ID = "eazy";
@@ -23,8 +26,11 @@ public final class EAzyClient implements ClientModInitializer {
 
 	@Override
 	public void onInitializeClient() {
-		// 1) Modülleri kaydet (Aşama 1'de sadece geçici test modülü)
-		ModuleManager.register(new TestModule());
+		// 1) Modülleri kaydet
+		ModuleManager.register(new NoParticlesModule());
+		ModuleManager.register(new FpsProfileModule());
+		ModuleManager.register(new ZoomModule());
+		ModuleManager.register(new TestModule()); // GEÇİCİ, son aşamada silinecek
 
 		// 2) Kayıtlı ayarları oku ve modüllere uygula
 		ConfigManager.load();

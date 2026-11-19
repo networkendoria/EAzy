@@ -6,5 +6,20 @@
 	"eazy.state.off": "OFF",
 	"eazy.state.error": "ERROR",
 	"eazy.button.done": "Done",
-	"module.eazy.test": "Test module"
+	"module.eazy.test": "Test module",
+	"key.eazy.fps_profile": "Cycle FPS profile",
+	"key.eazy.zoom": "Zoom (hold)",
+	"module.eazy.no_particles": "No particles",
+	"module.eazy.fps_profile": "FPS profile (F7)",
+	"module.eazy.zoom": "Zoom (F8)",
+	"setting.eazy.zoom.level": "Zoom level",
+	"setting.eazy.zoom.smooth": "Smooth zoom",
+	"setting.eazy.zoom.sensitivity": "Zoom sensitivity",
+	"setting.eazy.test.log_messages": "Log messages",
+	"eazy.button.settings": "...",
+	"eazy.fps.detected": "Detected FPS mods: %s",
+	"eazy.fps.profile": "FPS profile: %s",
+	"eazy.fps.profile.low": "Low",
+	"eazy.fps.profile.medium": "Medium",
+	"eazy.fps.profile.high": "High"
 }
