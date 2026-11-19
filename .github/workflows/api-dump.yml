@@ -5,6 +5,10 @@ on:
       classes:
         description: "Boşlukla ayrılmış tam sınıf adları (javap ile imzaları yazdırılır)"
         required: true
+      bytecode:
+        description: "true ise javap -c (bytecode) de yazdırılır"
+        required: false
+        default: "false"
 
 jobs:
   dump:
@@ -21,6 +25,7 @@ jobs:
       - name: javap
         env:
           CLASSES: ${{ inputs.classes }}
+          BYTECODE: ${{ inputs.bytecode }}
         run: |
           JARS=$(find ~/.gradle "$GITHUB_WORKSPACE/.gradle" -name '*.jar' 2>/dev/null | grep -i 'minecraft' | grep -v -E 'sources|fabric-loader' || true)
           echo "=== jar listesi"; echo "$JARS"
@@ -28,7 +33,8 @@ jobs:
             echo; echo "################ $c"
             FOUND=0
             for j in $JARS; do
-              if javap -p -cp "$j" "$c" 2>/dev/null; then FOUND=1; break; fi
+              FLAGS="-p"; [ "$BYTECODE" = "true" ] && FLAGS="-p -c"
+              if javap $FLAGS -cp "$j" "$c" 2>/dev/null; then FOUND=1; break; fi
             done
-            [ $FOUND = 0 ] && echo "BULUNAMADI"
+            if [ $FOUND = 0 ]; then echo "BULUNAMADI"; fi
           done
