@@ -1,5 +1,6 @@
 package com.eazy.client.mixin;
 
+import com.eazy.client.modules.AutoGgModule;
 import com.eazy.client.modules.ItemOutlineModule;
 import com.eazy.client.modules.UiModule;
 import net.minecraft.client.DeltaTracker;
@@ -27,6 +28,7 @@ public abstract class HudMixin {
 
 	@Inject(method = "extractItemHotbar", at = @At("TAIL"))
 	private void eazy$numbers(GuiGraphicsExtractor graphics, DeltaTracker tracker, CallbackInfo ci) {
+		AutoGgModule.renderTargetTotems(graphics);
 		if (!UiModule.hotbarNumbers()) {
 			return;
 		}

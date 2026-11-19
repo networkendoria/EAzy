@@ -36,5 +36,6 @@
 	"setting.eazy.ui.transparent_inventory": "Transparent inventory",
 	"setting.eazy.ui.hotbar_numbers": "Hotbar numbers",
 	"setting.eazy.item_outline.hotbar": "Hotbar outline",
-	"setting.eazy.item_outline.inventory": "Inventory outline"
+	"setting.eazy.item_outline.inventory": "Inventory outline",
+	"module.eazy.autogg": "AutoGG"
 }

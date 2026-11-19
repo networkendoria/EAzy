@@ -7,7 +7,6 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
-import java.awt.Color;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -45,8 +44,30 @@ public final class ItemOutlineModule extends EAzyModule {
 			hash *= 0x45d9f3b;
 			hash ^= hash >>> 16;
 			float hue = (hash & 0xFFFF) / 65536f;
-			return Color.HSBtoRGB(hue, 0.85f, 1.0f) | 0xFF000000;
+			return hsvToArgb(hue, 0.85f, 1.0f);
 		});
+	}
+
+	/** java.awt kullanmadan HSV -> ARGB (Android'de java.awt olmayabilir). */
+	private static int hsvToArgb(float h, float s, float v) {
+		float hh = (h - (float) Math.floor(h)) * 6f;
+		int sector = (int) hh;
+		float f = hh - sector;
+		float p = v * (1f - s);
+		float q = v * (1f - s * f);
+		float t = v * (1f - s * (1f - f));
+		float r;
+		float g;
+		float b;
+		switch (sector) {
+			case 0 -> { r = v; g = t; b = p; }
+			case 1 -> { r = q; g = v; b = p; }
+			case 2 -> { r = p; g = v; b = t; }
+			case 3 -> { r = p; g = q; b = v; }
+			case 4 -> { r = t; g = p; b = v; }
+			default -> { r = v; g = p; b = q; }
+		}
+		return 0xFF000000 | (Math.round(r * 255) << 16) | (Math.round(g * 255) << 8) | Math.round(b * 255);
 	}
 
 	@Override

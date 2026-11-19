@@ -36,5 +36,6 @@
 	"setting.eazy.ui.transparent_inventory": "Şeffaf envanter",
 	"setting.eazy.ui.hotbar_numbers": "Hotbar numaraları",
 	"setting.eazy.item_outline.hotbar": "Hotbar çerçevesi",
-	"setting.eazy.item_outline.inventory": "Envanter çerçevesi"
+	"setting.eazy.item_outline.inventory": "Envanter çerçevesi",
+	"module.eazy.autogg": "AutoGG"
 }
