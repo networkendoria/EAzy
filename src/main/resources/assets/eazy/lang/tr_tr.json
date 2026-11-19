@@ -21,5 +21,14 @@
 	"eazy.fps.profile": "FPS profili: %s",
 	"eazy.fps.profile.low": "Düşük",
 	"eazy.fps.profile.medium": "Orta",
-	"eazy.fps.profile.high": "Yüksek"
+	"eazy.fps.profile.high": "Yüksek",
+	"key.eazy.shortcut.1": "Kısayol 1",
+	"key.eazy.shortcut.2": "Kısayol 2",
+	"key.eazy.shortcut.3": "Kısayol 3",
+	"key.eazy.shortcut.4": "Kısayol 4",
+	"key.eazy.shortcut.5": "Kısayol 5",
+	"key.eazy.shortcut.6": "Kısayol 6",
+	"module.eazy.shortcuts": "Komut/Yazı Kısayolları",
+	"screen.eazy.shortcuts": "Kısayollar",
+	"eazy.shortcuts.hint": "/ ile başlarsa komut, değilse sohbet mesajı. Tuşu Kontroller > EAzy'den ata."
 }

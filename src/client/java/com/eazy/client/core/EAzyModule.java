@@ -1,6 +1,7 @@
 package com.eazy.client.core;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -65,6 +66,11 @@ public abstract class EAzyModule {
 	/** Modül hata verip otomatik kapatıldıysa true. */
 	public final boolean isFailed() {
 		return failed;
+	}
+
+	/** Modülün kendine özel ayar ekranı varsa döndürür (yoksa null: standart ayar ekranı kullanılır). */
+	public Screen createSettingsScreen(Screen parent) {
+		return null;
 	}
 
 	public final List<Setting<?>> settings() {

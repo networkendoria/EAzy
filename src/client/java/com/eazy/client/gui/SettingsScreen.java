@@ -36,7 +36,8 @@ public class SettingsScreen extends Screen {
 			if (y + BUTTON_HEIGHT > this.height - BOTTOM_RESERVED) {
 				break; // Ekrana sığmayanlar Aşama 5'teki kategorili menüde gösterilecek.
 			}
-			boolean hasSettings = module.settings().stream().anyMatch(s -> !s.isHidden());
+			boolean hasSettings = module.settings().stream().anyMatch(s -> !s.isHidden())
+					|| module.createSettingsScreen(this) != null;
 			int toggleWidth = hasSettings ? 170 : 200;
 
 			this.addRenderableWidget(Button.builder(label(module), btn -> {
@@ -46,7 +47,10 @@ public class SettingsScreen extends Screen {
 
 			if (hasSettings) {
 				this.addRenderableWidget(Button.builder(Component.translatable("eazy.button.settings"),
-								btn -> this.minecraft.gui.setScreen(new ModuleSettingsScreen(this, module)))
+								btn -> {
+								net.minecraft.client.gui.screens.Screen custom = module.createSettingsScreen(this);
+								this.minecraft.gui.setScreen(custom != null ? custom : new ModuleSettingsScreen(this, module));
+							})
 						.bounds(x + 174, y, 26, BUTTON_HEIGHT).build());
 			}
 			y += ROW;

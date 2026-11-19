@@ -21,5 +21,14 @@
 	"eazy.fps.profile": "FPS profile: %s",
 	"eazy.fps.profile.low": "Low",
 	"eazy.fps.profile.medium": "Medium",
-	"eazy.fps.profile.high": "High"
+	"eazy.fps.profile.high": "High",
+	"key.eazy.shortcut.1": "Shortcut 1",
+	"key.eazy.shortcut.2": "Shortcut 2",
+	"key.eazy.shortcut.3": "Shortcut 3",
+	"key.eazy.shortcut.4": "Shortcut 4",
+	"key.eazy.shortcut.5": "Shortcut 5",
+	"key.eazy.shortcut.6": "Shortcut 6",
+	"module.eazy.shortcuts": "Command/Text Shortcuts",
+	"screen.eazy.shortcuts": "Shortcuts",
+	"eazy.shortcuts.hint": "Starts with / = command, otherwise chat message. Bind keys in Controls > EAzy."
 }
