@@ -22,7 +22,7 @@ jobs:
         env:
           CLASSES: ${{ inputs.classes }}
         run: |
-          JARS=$(find ~/.gradle -name '*.jar' | grep -i 'minecraft' | grep -v -E 'sources|fabric-loader|loom' || true)
+          JARS=$(find ~/.gradle "$GITHUB_WORKSPACE/.gradle" -name '*.jar' 2>/dev/null | grep -i 'minecraft' | grep -v -E 'sources|fabric-loader' || true)
           echo "=== jar listesi"; echo "$JARS"
           for c in $CLASSES; do
             echo; echo "################ $c"
