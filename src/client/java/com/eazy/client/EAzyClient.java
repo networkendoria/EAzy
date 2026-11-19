@@ -36,8 +36,8 @@ public final class EAzyClient implements ClientModInitializer {
 		// 4) Her tick: menü tuşu + açık modüllerin tick'i
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
 			while (openMenu.consumeClick()) {
-				if (client.screen == null) {
-					client.setScreen(new SettingsScreen(null));
+				if (client.gui.screen() == null) {
+					client.gui.setScreen(new SettingsScreen(null));
 				}
 			}
 			ModuleManager.tick(client);
