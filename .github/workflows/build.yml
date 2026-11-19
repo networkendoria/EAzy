@@ -4,6 +4,8 @@ on: [push, pull_request, workflow_dispatch]
 jobs:
   build:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: write
     steps:
       - name: checkout repository
         uses: actions/checkout@v6
@@ -25,3 +27,10 @@ jobs:
         with:
           name: EAzy
           path: EAzy.jar
+      - name: publish download link (release "latest")
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete latest --cleanup-tag --yes || true
+          gh release create latest EAzy.jar --title "EAzy (son derleme)" --notes "Commit ${GITHUB_SHA::7}" --target "$GITHUB_SHA"
