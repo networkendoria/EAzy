@@ -5,7 +5,10 @@
 	"client": [
 		"ParticleEngineMixin",
 		"CameraMixin",
-		"MouseHandlerMixin"
+		"MouseHandlerMixin",
+		"HudMixin",
+		"AbstractContainerScreenMixin",
+		"ScreenMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

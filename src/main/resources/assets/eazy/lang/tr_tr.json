@@ -30,5 +30,11 @@
 	"key.eazy.shortcut.6": "Kısayol 6",
 	"module.eazy.shortcuts": "Komut/Yazı Kısayolları",
 	"screen.eazy.shortcuts": "Kısayollar",
-	"eazy.shortcuts.hint": "/ ile başlarsa komut, değilse sohbet mesajı. Tuşu Kontroller > EAzy'den ata."
+	"eazy.shortcuts.hint": "/ ile başlarsa komut, değilse sohbet mesajı. Tuşu Kontroller > EAzy'den ata.",
+	"module.eazy.ui": "Arayüz",
+	"module.eazy.item_outline": "Eşya Çerçevesi",
+	"setting.eazy.ui.transparent_inventory": "Şeffaf envanter",
+	"setting.eazy.ui.hotbar_numbers": "Hotbar numaraları",
+	"setting.eazy.item_outline.hotbar": "Hotbar çerçevesi",
+	"setting.eazy.item_outline.inventory": "Envanter çerçevesi"
 }

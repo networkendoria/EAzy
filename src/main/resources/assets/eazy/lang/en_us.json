@@ -30,5 +30,11 @@
 	"key.eazy.shortcut.6": "Shortcut 6",
 	"module.eazy.shortcuts": "Command/Text Shortcuts",
 	"screen.eazy.shortcuts": "Shortcuts",
-	"eazy.shortcuts.hint": "Starts with / = command, otherwise chat message. Bind keys in Controls > EAzy."
+	"eazy.shortcuts.hint": "Starts with / = command, otherwise chat message. Bind keys in Controls > EAzy.",
+	"module.eazy.ui": "Interface",
+	"module.eazy.item_outline": "Item Outline",
+	"setting.eazy.ui.transparent_inventory": "Transparent inventory",
+	"setting.eazy.ui.hotbar_numbers": "Hotbar numbers",
+	"setting.eazy.item_outline.hotbar": "Hotbar outline",
+	"setting.eazy.item_outline.inventory": "Inventory outline"
 }

@@ -5,7 +5,9 @@ import com.eazy.client.core.ModuleManager;
 import com.eazy.client.gui.SettingsScreen;
 import com.eazy.client.input.EAzyKeys;
 import com.eazy.client.modules.FpsProfileModule;
+import com.eazy.client.modules.ItemOutlineModule;
 import com.eazy.client.modules.NoParticlesModule;
+import com.eazy.client.modules.UiModule;
 import com.eazy.client.modules.ShortcutsModule;
 import com.eazy.client.modules.TestModule;
 import com.eazy.client.modules.ZoomModule;
@@ -32,6 +34,8 @@ public final class EAzyClient implements ClientModInitializer {
 		ModuleManager.register(new FpsProfileModule());
 		ModuleManager.register(new ZoomModule());
 		ModuleManager.register(new ShortcutsModule());
+		ModuleManager.register(new UiModule());
+		ModuleManager.register(new ItemOutlineModule());
 		ModuleManager.register(new TestModule()); // GEÇİCİ, son aşamada silinecek
 
 		// 2) Kayıtlı ayarları oku ve modüllere uygula
