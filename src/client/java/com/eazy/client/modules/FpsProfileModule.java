@@ -4,7 +4,6 @@ import com.eazy.client.EAzyClient;
 import com.eazy.client.core.Category;
 import com.eazy.client.core.EAzyModule;
 import com.eazy.client.core.Setting;
-import com.eazy.client.input.EAzyKeys;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.CloudStatus;
 import net.minecraft.client.KeyMapping;
@@ -39,7 +38,7 @@ public final class FpsProfileModule extends EAzyModule {
 			new Profile("high", 12, 8, 1.0, CloudStatus.FAST, true, 2, true, true)
 	};
 
-	private final KeyMapping key = EAzyKeys.register("key.eazy.fps_profile", GLFW.GLFW_KEY_F7);
+	private final KeyMapping key = bindKey("key.eazy.fps_profile", GLFW.GLFW_KEY_F7);
 
 	/** Son uygulanan profil (-1: henüz hiçbiri). Ayar ekranında görünmez. */
 	private final Setting<Integer> current = setting("current", Integer.class, -1).hidden();

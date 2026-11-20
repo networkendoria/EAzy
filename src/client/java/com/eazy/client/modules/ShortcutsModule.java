@@ -4,7 +4,6 @@ import com.eazy.client.core.Category;
 import com.eazy.client.core.EAzyModule;
 import com.eazy.client.core.Setting;
 import com.eazy.client.gui.ShortcutsScreen;
-import com.eazy.client.input.EAzyKeys;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
@@ -26,7 +25,7 @@ public final class ShortcutsModule extends EAzyModule {
 	public ShortcutsModule() {
 		super("shortcuts", Category.SHORTCUTS, true);
 		for (int i = 1; i <= SLOTS; i++) {
-			keys.add(EAzyKeys.register("key.eazy.shortcut." + i, GLFW.GLFW_KEY_UNKNOWN));
+			keys.add(bindKey("key.eazy.shortcut." + i, GLFW.GLFW_KEY_UNKNOWN));
 			texts.add(setting("slot" + i, String.class, "").hidden());
 		}
 	}

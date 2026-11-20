@@ -3,7 +3,6 @@ package com.eazy.client.modules;
 import com.eazy.client.core.Category;
 import com.eazy.client.core.EAzyModule;
 import com.eazy.client.core.Setting;
-import com.eazy.client.input.EAzyKeys;
 import net.minecraft.client.KeyMapping;
 import org.lwjgl.glfw.GLFW;
 
@@ -14,7 +13,7 @@ import org.lwjgl.glfw.GLFW;
 public final class ZoomModule extends EAzyModule {
 	private static ZoomModule instance;
 
-	private final KeyMapping key = EAzyKeys.register("key.eazy.zoom", GLFW.GLFW_KEY_F8);
+	private final KeyMapping key = bindKey("key.eazy.zoom", GLFW.GLFW_KEY_F8);
 	private final Setting<Double> level = setting("level", Double.class, 4.0).range(1.5, 10.0, 0.5);
 	private final Setting<Boolean> smooth = setting("smooth", Boolean.class, true);
 	private final Setting<Double> sensitivity = setting("sensitivity", Double.class, 1.0).range(0.1, 1.0, 0.1);

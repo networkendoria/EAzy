@@ -69,6 +69,14 @@ public final class Setting<T> {
 		return step > 0;
 	}
 
+	public double min() {
+		return min;
+	}
+
+	public double max() {
+		return max;
+	}
+
 	public double step() {
 		return step;
 	}

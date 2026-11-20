@@ -2,7 +2,7 @@ package com.eazy.client;
 
 import com.eazy.client.core.ConfigManager;
 import com.eazy.client.core.ModuleManager;
-import com.eazy.client.gui.SettingsScreen;
+import com.eazy.client.gui.ClickGuiScreen;
 import com.eazy.client.input.EAzyKeys;
 import com.eazy.client.modules.FpsProfileModule;
 import com.eazy.client.modules.AutoGgModule;
@@ -51,7 +51,7 @@ public final class EAzyClient implements ClientModInitializer {
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
 			while (openMenu.consumeClick()) {
 				if (client.gui.screen() == null) {
-					client.gui.setScreen(new SettingsScreen(null));
+					client.gui.setScreen(new ClickGuiScreen(null));
 				}
 			}
 			ModuleManager.tick(client);

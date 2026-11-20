@@ -1,5 +1,7 @@
 package com.eazy.client.core;
 
+import com.eazy.client.input.EAzyKeys;
+import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 
@@ -17,6 +19,7 @@ public abstract class EAzyModule {
 	private final Category category;
 	private final boolean defaultEnabled;
 	private final List<Setting<?>> settings = new ArrayList<>();
+	private final List<KeyMapping> keys = new ArrayList<>();
 
 	// ModuleManager tarafından yönetilir (aynı paket)
 	boolean enabled;
@@ -71,6 +74,17 @@ public abstract class EAzyModule {
 	/** Modülün kendine özel ayar ekranı varsa döndürür (yoksa null: standart ayar ekranı kullanılır). */
 	public Screen createSettingsScreen(Screen parent) {
 		return null;
+	}
+
+	/** Modüle ait bir tuş kaydeder (Kontroller ekranında ve ClickGUI'de değiştirilebilir). Constructor/alan başlatmada çağrılır. */
+	protected final KeyMapping bindKey(String translationKey, int glfwKey) {
+		KeyMapping mapping = EAzyKeys.register(translationKey, glfwKey);
+		keys.add(mapping);
+		return mapping;
+	}
+
+	public final List<KeyMapping> keyBindings() {
+		return Collections.unmodifiableList(keys);
 	}
 
 	public final List<Setting<?>> settings() {
