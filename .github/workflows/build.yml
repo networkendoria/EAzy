@@ -14,7 +14,7 @@ jobs:
       - name: setup jdk
         uses: actions/setup-java@v5
         with:
-          java-version: '25'
+          java-version: '21'
           distribution: 'microsoft'
       - name: make gradle wrapper executable
         run: chmod +x ./gradlew
@@ -28,9 +28,9 @@ jobs:
           name: EAzy
           path: EAzy.jar
       - name: publish download link (release "latest")
-        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        if: github.ref == 'refs/heads/mc-1.21.11' && github.event_name != 'pull_request'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release delete latest --cleanup-tag --yes || true
-          gh release create latest EAzy.jar --title "EAzy (son derleme)" --notes "Commit ${GITHUB_SHA::7}" --target "$GITHUB_SHA"
+          gh release delete latest-1.21.11 --cleanup-tag --yes || true
+          gh release create latest-1.21.11 EAzy.jar --title "EAzy 1.21.11 (son derleme)" --notes "Commit ${GITHUB_SHA::7}" --target "$GITHUB_SHA"
