@@ -8,7 +8,8 @@
 		"MouseHandlerMixin",
 		"HudMixin",
 		"AbstractContainerScreenMixin",
-		"ScreenMixin"
+		"ScreenMixin",
+		"ArmorStandInvoker"
 	],
 	"injectors": {
 		"defaultRequire": 1

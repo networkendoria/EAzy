@@ -42,5 +42,9 @@
 	"category.eazy.interface": "Interface",
 	"category.eazy.integration": "Integration",
 	"category.eazy.debug": "Debug",
-	"eazy.menu.search": "Search"
+	"eazy.menu.search": "Search",
+	"module.eazy.easypvp": "EasyPVP",
+	"setting.eazy.easypvp.totem_counter": "Totem counter",
+	"setting.eazy.easypvp.cosmetic": "Cosmetic",
+	"eazy.easypvp.particles": "Particles"
 }

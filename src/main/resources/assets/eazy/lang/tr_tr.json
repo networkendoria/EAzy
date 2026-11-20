@@ -42,5 +42,9 @@
 	"category.eazy.interface": "Arayüz",
 	"category.eazy.integration": "Entegrasyon",
 	"category.eazy.debug": "Hata ayıklama",
-	"eazy.menu.search": "Ara"
+	"eazy.menu.search": "Ara",
+	"module.eazy.easypvp": "EasyPVP",
+	"setting.eazy.easypvp.totem_counter": "Totem sayacı",
+	"setting.eazy.easypvp.cosmetic": "Kozmetik",
+	"eazy.easypvp.particles": "Partiküller"
 }

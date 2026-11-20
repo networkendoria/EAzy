@@ -6,6 +6,7 @@ import com.eazy.client.gui.SettingsScreen;
 import com.eazy.client.input.EAzyKeys;
 import com.eazy.client.modules.FpsProfileModule;
 import com.eazy.client.modules.AutoGgModule;
+import com.eazy.client.modules.EasyPvpModule;
 import com.eazy.client.modules.ItemOutlineModule;
 import com.eazy.client.modules.NoParticlesModule;
 import com.eazy.client.modules.UiModule;
@@ -37,6 +38,7 @@ public final class EAzyClient implements ClientModInitializer {
 		ModuleManager.register(new UiModule());
 		ModuleManager.register(new ItemOutlineModule());
 		ModuleManager.register(new AutoGgModule());
+		ModuleManager.register(new EasyPvpModule());
 
 		// 2) Kayıtlı ayarları oku ve modüllere uygula
 		ConfigManager.load();
