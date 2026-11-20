@@ -27,12 +27,12 @@ jobs:
           CLASSES: ${{ inputs.classes }}
           BYTECODE: ${{ inputs.bytecode }}
         run: |
-          JARS=$(find ~/.gradle "$GITHUB_WORKSPACE/.gradle" -name '*.jar' 2>/dev/null | grep -i -E 'minecraft|gametest|command-api|key-mapping' | grep -v -E 'sources|fabric-loader' || true)
+          JARS=$(find ~/.gradle "$GITHUB_WORKSPACE/.gradle" -name '*.jar' 2>/dev/null | grep -i -E 'minecraft|gametest|command-api|key-binding' | grep -v -E 'sources|fabric-loader' || true)
           echo "=== jar listesi"; echo "$JARS"
           for j in $JARS; do
-            case "$j" in *key-mapping*) echo "=== keymapping sınıfları: $j"; jar tf "$j" | grep -E '\.class$' | grep -i keymapping ;; esac
-            case "$j" in *command-api*) echo "=== command sınıfları: $j"; jar tf "$j" | grep -E 'client/command/v2/.*\.class$' ;; esac
-            case "$j" in *gametest*) echo "=== gametest sınıfları: $j"; jar tf "$j" | grep -E '^net/fabricmc/fabric/api/client/gametest/v1/.*\.class$' | sed 's/\.class$//; s#/#.#g' ;; esac
+            case "$j" in *key-binding*) echo "=== keymapping sınıfları: $j"; jar tf "$j" | grep -E '\.class$' | grep -i -E 'keybind|keymapping' || true ;; esac
+            case "$j" in *command-api*) echo "=== command sınıfları: $j"; jar tf "$j" | grep -E 'client/command/v2/.*\.class$' || true ;; esac
+            case "$j" in *gametest*) echo "=== gametest sınıfları: $j"; jar tf "$j" | grep -E '^net/fabricmc/fabric/api/client/gametest/v1/.*\.class$' | sed 's/\.class$//; s#/#.#g' || true ;; esac
           done
           for c in $CLASSES; do
             echo; echo "################ $c"
