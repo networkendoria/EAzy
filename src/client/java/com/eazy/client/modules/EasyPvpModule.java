@@ -8,10 +8,10 @@ import com.eazy.client.core.Setting;
 import com.eazy.client.gui.EasyPvpScreen;
 import com.eazy.client.mixin.ArmorStandInvoker;
 import com.mojang.brigadier.Command;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
@@ -103,9 +103,9 @@ public final class EasyPvpModule extends EAzyModule {
 
 	private void registerCommand() {
 		ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
-			var cos = ClientCommands.literal("cos");
+			var cos = ClientCommandManager.literal("cos");
 			for (String id : COSMETIC_IDS) {
-				cos = cos.then(ClientCommands.literal(id).executes(ctx -> {
+				cos = cos.then(ClientCommandManager.literal(id).executes(ctx -> {
 					setCosmetic(id);
 					Item item = itemFor(id);
 					ctx.getSource().sendFeedback(Component.literal("Kozmetik: "
@@ -113,15 +113,15 @@ public final class EasyPvpModule extends EAzyModule {
 					return Command.SINGLE_SUCCESS;
 				}));
 			}
-			dispatcher.register(ClientCommands.literal("eaZZ")
-					.then(ClientCommands.literal("totem").executes(ctx -> {
+			dispatcher.register(ClientCommandManager.literal("eaZZ")
+					.then(ClientCommandManager.literal("totem").executes(ctx -> {
 						totemCounter.toggle();
 						ModuleManager.saveAsync();
 						ctx.getSource().sendFeedback(Component.literal(
 								"Totem sayacı: " + (totemCounter.get() ? "AÇIK" : "KAPALI")));
 						return Command.SINGLE_SUCCESS;
 					}))
-					.then(ClientCommands.literal("particle").executes(ctx -> {
+					.then(ClientCommandManager.literal("particle").executes(ctx -> {
 						toggleParticles();
 						EAzyModule m = particlesModule();
 						// Parçacıklar "kapalı modülü" açıkken parçacık yoktur.
@@ -226,7 +226,7 @@ public final class EasyPvpModule extends EAzyModule {
 	}
 
 	/** HudMixin tarafından çağrılır: XP seviyesinin üstünde, envanterdeki toplam totem sayısı (beyaz). */
-	public static void renderTotemCounter(GuiGraphicsExtractor graphics) {
+	public static void renderTotemCounter(GuiGraphics graphics) {
 		EasyPvpModule m = instance;
 		if (m == null || !m.isEnabled() || !m.totemCounter.get()) {
 			return;
@@ -244,7 +244,7 @@ public final class EasyPvpModule extends EAzyModule {
 				total += stack.getCount();
 			}
 		}
-		graphics.centeredText(client.font, Component.literal(Integer.toString(total)),
+		graphics.drawCenteredString(client.font, Component.literal(Integer.toString(total)),
 				graphics.guiWidth() / 2, graphics.guiHeight() - 46, 0xFFFFFFFF);
 	}
 }

@@ -9,7 +9,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.KeyMapping;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.KeyEvent;
@@ -272,13 +272,13 @@ public class ClickGuiScreen extends Screen {
 	// ---------------------------------------------------------------- çizim
 
 	@Override
-	public void extractBackground(GuiGraphicsExtractor g, int mouseX, int mouseY, float delta) {
+	public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float delta) {
 		// Oyunun üstüne hafif karartma; bulanıklık yok (performans).
 		g.fill(0, 0, this.width, this.height, alpha(0xFF000000, 0.45f * openAnim));
 	}
 
 	@Override
-	public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float delta) {
+	public void render(GuiGraphics g, int mouseX, int mouseY, float delta) {
 		long now = System.nanoTime();
 		float dt = Math.min((now - lastNanos) / 1_000_000_000f, 0.05f);
 		lastNanos = now;
@@ -289,7 +289,7 @@ public class ClickGuiScreen extends Screen {
 		}
 		hitCount = 0;
 
-		this.extractBackground(g, mouseX, mouseY, delta);
+		this.renderBackground(g, mouseX, mouseY, delta);
 		float ga = openAnim;
 		int slide = Math.round((1f - openAnim) * 8f);
 		int oy = py + slide;
@@ -302,19 +302,19 @@ public class ClickGuiScreen extends Screen {
 		drawSidebar(g, mouseX, mouseY, ga, oy, dt);
 		drawContent(g, mouseX, mouseY, ga, oy, dt);
 
-		search.extractRenderState(g, mouseX, mouseY, delta);
+		search.render(g, mouseX, mouseY, delta);
 	}
 
-	private void drawHeader(GuiGraphicsExtractor g, int mx, int my, float ga, int oy, float dt) {
+	private void drawHeader(GuiGraphics g, int mx, int my, float ga, int oy, float dt) {
 		g.fill(px, oy, px + pw, oy + HEADER_H, alpha(SURFACE, ga));
 		g.fill(px, oy + HEADER_H - 1, px + pw, oy + HEADER_H, alpha(BORDER, ga));
 		// Logo
 		g.fill(px + 8, oy + 7, px + 24, oy + 23, alpha(ACCENT, ga));
 		g.fill(px + 8, oy + 7, px + 24, oy + 8, alpha(LAVENDER, ga * 0.6f));
-		g.centeredText(this.font, Component.literal("E").withStyle(ChatFormatting.BOLD), px + 16, oy + 11, alpha(TEXT, ga));
-		g.text(this.font, Component.literal("EAzy").withStyle(ChatFormatting.BOLD), px + 30, oy + 6, alpha(TEXT, ga), false);
+		g.drawCenteredString(this.font, Component.literal("E").withStyle(ChatFormatting.BOLD), px + 16, oy + 11, alpha(TEXT, ga));
+		g.drawString(this.font, Component.literal("EAzy").withStyle(ChatFormatting.BOLD), px + 30, oy + 6, alpha(TEXT, ga), false);
 		int vx = px + 30 + this.font.width("EAzy") + 4;
-		g.text(this.font, "v" + version, vx, oy + 6, alpha(MUTED, ga), false);
+		g.drawString(this.font, "v" + version, vx, oy + 6, alpha(MUTED, ga), false);
 		// Etkin durum göstergesi
 		int active = 0;
 		for (EAzyModule m : ModuleManager.all()) {
@@ -323,7 +323,7 @@ public class ClickGuiScreen extends Screen {
 			}
 		}
 		g.fill(px + 30, oy + 19, px + 34, oy + 23, alpha(ACCENT, ga));
-		g.text(this.font, String.format(t("eazy.gui.active_count"), active), px + 38, oy + 17, alpha(LAVENDER, ga), false);
+		g.drawString(this.font, String.format(t("eazy.gui.active_count"), active), px + 38, oy + 17, alpha(LAVENDER, ga), false);
 
 		// Arama kutusu zemini
 		int sw = Math.min(140, pw / 3);
@@ -339,11 +339,11 @@ public class ClickGuiScreen extends Screen {
 		boolean over = mx >= bx && mx < bx + 16 && my >= oy + 7 && my < oy + 23;
 		float hv = approach("close", over ? 1f : 0f, 10f, dt);
 		g.fill(bx, oy + 7, bx + 16, oy + 23, alpha(mix(CARD, DANGER, hv * 0.8f), ga));
-		g.centeredText(this.font, "×", bx + 8, oy + 11, alpha(TEXT, ga));
+		g.drawCenteredString(this.font, "×", bx + 8, oy + 11, alpha(TEXT, ga));
 		hit(bx, oy + 7, bx + 16, oy + 23, H_CLOSE, null, null);
 	}
 
-	private void drawSidebar(GuiGraphicsExtractor g, int mx, int my, float ga, int oy, float dt) {
+	private void drawSidebar(GuiGraphics g, int mx, int my, float ga, int oy, float dt) {
 		int top = oy + HEADER_H;
 		g.fill(px, top, px + sideW, oy + ph, alpha(SURFACE, ga));
 		g.fill(px + sideW - 1, top, px + sideW, oy + ph, alpha(BORDER, ga));
@@ -358,7 +358,7 @@ public class ClickGuiScreen extends Screen {
 			g.fill(px + 5, y, px + sideW - 6, y + 22, alpha(bg, ga));
 			g.fill(px + 5, y, px + 5 + Math.round(2 * s), y + 22, alpha(ACCENT, ga));
 			String name = t("category.eazy." + c.name().toLowerCase(Locale.ROOT));
-			g.text(this.font, fit(name, sideW - 36), px + 12, y + 7, alpha(mix(MUTED, TEXT, Math.max(s, hv)), ga), false);
+			g.drawString(this.font, fit(name, sideW - 36), px + 12, y + 7, alpha(mix(MUTED, TEXT, Math.max(s, hv)), ga), false);
 			int total = 0;
 			int on = 0;
 			for (EAzyModule m : ModuleManager.all()) {
@@ -370,7 +370,7 @@ public class ClickGuiScreen extends Screen {
 				}
 			}
 			String cnt = on + "/" + total;
-			g.text(this.font, cnt, px + sideW - 9 - this.font.width(cnt), y + 7, alpha(s > 0.5f ? LAVENDER : MUTED, ga), false);
+			g.drawString(this.font, cnt, px + sideW - 9 - this.font.width(cnt), y + 7, alpha(s > 0.5f ? LAVENDER : MUTED, ga), false);
 			hit(px + 4, y, px + sideW - 5, y + 22, H_CATEGORY, c, null);
 			y += 25;
 		}
@@ -378,11 +378,11 @@ public class ClickGuiScreen extends Screen {
 		List<String> found = FpsProfileModule.detectedMods();
 		if (!found.isEmpty()) {
 			String line = fit(String.format(t("eazy.fps.detected"), String.join(", ", found)), sideW - 12);
-			g.text(this.font, line, px + 7, oy + ph - 13, alpha(MUTED, ga), false);
+			g.drawString(this.font, line, px + 7, oy + ph - 13, alpha(MUTED, ga), false);
 		}
 	}
 
-	private void drawContent(GuiGraphicsExtractor g, int mx, int my, float ga, int oy, float dt) {
+	private void drawContent(GuiGraphics g, int mx, int my, float ga, int oy, float dt) {
 		int top = oy + HEADER_H;
 		int h = ch;
 		// Kaydırma sınırı ve yumuşatma
@@ -404,12 +404,12 @@ public class ClickGuiScreen extends Screen {
 		boolean searching = !query.isBlank();
 		String label = searching ? t("eazy.gui.results")
 				: t("category.eazy." + selected.name().toLowerCase(Locale.ROOT));
-		g.text(this.font, label, cardX, y, alpha(LAVENDER, fade), false);
+		g.drawString(this.font, label, cardX, y, alpha(LAVENDER, fade), false);
 		g.fill(cardX, y + 11, cardX + 18, y + 12, alpha(ACCENT, fade));
 		y += 18;
 
 		if (visible.isEmpty()) {
-			g.text(this.font, fit(t("eazy.gui.no_results"), cardW), cardX, y + 4, alpha(MUTED, fade), false);
+			g.drawString(this.font, fit(t("eazy.gui.no_results"), cardW), cardX, y + 4, alpha(MUTED, fade), false);
 			y += 20;
 		}
 		for (EAzyModule m : visible) {
@@ -429,13 +429,13 @@ public class ClickGuiScreen extends Screen {
 		}
 		if (listening != null) {
 			String hint = t("eazy.gui.key_hint");
-			g.centeredText(this.font, hint, cx + cw / 2, oy + ph - 12, alpha(LAVENDER, ga));
+			g.drawCenteredString(this.font, hint, cx + cw / 2, oy + ph - 12, alpha(LAVENDER, ga));
 		} else {
-			g.centeredText(this.font, fit(t("eazy.gui.hint"), cw - 12), cx + cw / 2, oy + ph - 12, alpha(MUTED, ga * 0.8f));
+			g.drawCenteredString(this.font, fit(t("eazy.gui.hint"), cw - 12), cx + cw / 2, oy + ph - 12, alpha(MUTED, ga * 0.8f));
 		}
 	}
 
-	private int drawCard(GuiGraphicsExtractor g, EAzyModule m, int x, int y, int w, int top, int mx, int my,
+	private int drawCard(GuiGraphics g, EAzyModule m, int x, int y, int w, int top, int mx, int my,
 						 float fade, float dt) {
 		int bodyFull = bodyHeight.getOrDefault(m, 0);
 		boolean open = Boolean.TRUE.equals(expanded.get(m));
@@ -456,10 +456,10 @@ public class ClickGuiScreen extends Screen {
 			g.fill(x + 1, y + 1, x + 1 + Math.round(2 * on), y + CARD_HEAD_H - 1, alpha(ACCENT, fade));
 
 			int textW = w - 70;
-			g.text(this.font, fit(t(m.translationKey()), textW), x + 10, y + 7,
+			g.drawString(this.font, fit(t(m.translationKey()), textW), x + 10, y + 7,
 					alpha(mix(TEXT_DIM, TEXT, on), fade), false);
 			String desc = m.isFailed() ? t("eazy.gui.failed") : t(m.translationKey() + ".desc");
-			g.text(this.font, fit(desc, textW), x + 10, y + 19, alpha(m.isFailed() ? DANGER : MUTED, fade), false);
+			g.drawString(this.font, fit(desc, textW), x + 10, y + 19, alpha(m.isFailed() ? DANGER : MUTED, fade), false);
 
 			// Anahtar
 			int sx = x + w - 34;
@@ -469,7 +469,7 @@ public class ClickGuiScreen extends Screen {
 			g.fill(kx, sy + 2, kx + 8, sy + 10, alpha(TEXT, fade));
 			// Aç/kapat oku
 			if (bodyFull > 0) {
-				g.text(this.font, open ? "v" : ">", x + w - 46, y + 12, alpha(MUTED, fade), false);
+				g.drawString(this.font, open ? "v" : ">", x + w - 46, y + 12, alpha(MUTED, fade), false);
 			}
 		}
 
@@ -494,7 +494,7 @@ public class ClickGuiScreen extends Screen {
 		return y + cardH;
 	}
 
-	private void drawBody(GuiGraphicsExtractor g, EAzyModule m, int x, int y, int w, int top, int mx, int my,
+	private void drawBody(GuiGraphics g, EAzyModule m, int x, int y, int w, int top, int mx, int my,
 						  float fade, float dt, boolean interactive) {
 		for (Setting<?> s : m.settings()) {
 			if (s.isHidden()) {
@@ -504,7 +504,7 @@ public class ClickGuiScreen extends Screen {
 			if (s.isBoolean()) {
 				boolean on = Boolean.TRUE.equals(s.get());
 				float tv = approach(s, on ? 1f : 0f, 10f, dt);
-				g.text(this.font, fit(name, w - 40), x, y + 6, alpha(TEXT_DIM, fade), false);
+				g.drawString(this.font, fit(name, w - 40), x, y + 6, alpha(TEXT_DIM, fade), false);
 				int sx = x + w - 24;
 				g.fill(sx, y + 4, sx + 24, y + 16, alpha(mix(TRACK_OFF, ACCENT, tv), fade));
 				int kx = sx + 2 + Math.round(12 * tv);
@@ -516,8 +516,8 @@ public class ClickGuiScreen extends Screen {
 			} else if (s.isNumber()) {
 				String val = s.get() instanceof Integer i ? Integer.toString(i)
 						: String.format(Locale.ROOT, "%.1f", s.asDouble());
-				g.text(this.font, fit(name, w - 40), x, y + 2, alpha(TEXT_DIM, fade), false);
-				g.text(this.font, val, x + w - this.font.width(val), y + 2, alpha(LAVENDER, fade), false);
+				g.drawString(this.font, fit(name, w - 40), x, y + 2, alpha(TEXT_DIM, fade), false);
+				g.drawString(this.font, val, x + w - this.font.width(val), y + 2, alpha(LAVENDER, fade), false);
 				int ty = y + 17;
 				double span = s.max() - s.min();
 				float frac = span <= 0 ? 0f : (float) ((s.asDouble() - s.min()) / span);
@@ -535,7 +535,7 @@ public class ClickGuiScreen extends Screen {
 		for (KeyMapping k : m.keyBindings()) {
 			boolean listen = listening == k;
 			String name = t("eazy.gui.key") + ": " + t(k.getName());
-			g.text(this.font, fit(name, w - 80), x, y + 6, alpha(TEXT_DIM, fade), false);
+			g.drawString(this.font, fit(name, w - 80), x, y + 6, alpha(TEXT_DIM, fade), false);
 			String keyText = listen ? t("eazy.gui.press_key")
 					: (k.isUnbound() ? t("eazy.gui.unbound") : k.getTranslatedKeyMessage().getString());
 			int bw = Math.min(w - 8, Math.max(60, this.font.width(keyText) + 12));
@@ -544,7 +544,7 @@ public class ClickGuiScreen extends Screen {
 			float hv = approach(new ExKey(k), over || listen ? 1f : 0f, 10f, dt);
 			g.fill(bx, y + 1, bx + bw, y + 19, alpha(mix(BORDER, ACCENT, listen ? 1f : hv * 0.6f), fade));
 			g.fill(bx + 1, y + 2, bx + bw - 1, y + 18, alpha(BG, fade));
-			g.centeredText(this.font, fit(keyText, bw - 6), bx + bw / 2, y + 6, alpha(listen ? LAVENDER : TEXT, fade));
+			g.drawCenteredString(this.font, fit(keyText, bw - 6), bx + bw / 2, y + 6, alpha(listen ? LAVENDER : TEXT, fade));
 			if (interactive && inContent(y, y + ROW_H)) {
 				hit(bx, Math.max(y + 1, top), bx + bw, Math.min(y + 19, top + ch), H_KEY, k, null);
 			}
@@ -555,7 +555,7 @@ public class ClickGuiScreen extends Screen {
 			float hv = approach(new ExKey(m), over ? 1f : 0f, 10f, dt);
 			g.fill(x, y + 1, x + w, y + 19, alpha(mix(BORDER, ACCENT, hv), fade));
 			g.fill(x + 1, y + 2, x + w - 1, y + 18, alpha(BG, fade));
-			g.centeredText(this.font, t("eazy.gui.advanced") + "  >", x + w / 2, y + 6, alpha(LAVENDER, fade));
+			g.drawCenteredString(this.font, t("eazy.gui.advanced") + "  >", x + w / 2, y + 6, alpha(LAVENDER, fade));
 			if (interactive && inContent(y, y + ROW_H)) {
 				hit(x, Math.max(y + 1, top), x + w, Math.min(y + 19, top + ch), H_ADVANCED, m, null);
 			}
@@ -709,7 +709,7 @@ public class ClickGuiScreen extends Screen {
 				EAzyModule m = (EAzyModule) h.a;
 				Screen custom = m.createSettingsScreen(this);
 				if (custom != null) {
-					this.minecraft.gui.setScreen(custom);
+					this.minecraft.setScreen(custom);
 				}
 			}
 			default -> {
@@ -780,6 +780,6 @@ public class ClickGuiScreen extends Screen {
 	@Override
 	public void onClose() {
 		ModuleManager.saveAsync();
-		this.minecraft.gui.setScreen(this.parent);
+		this.minecraft.setScreen(this.parent);
 	}
 }

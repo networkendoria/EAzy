@@ -6,13 +6,13 @@ import com.eazy.client.core.EAzyModule;
 import com.eazy.client.core.ModuleManager;
 import com.eazy.client.modules.autogg.LearnedPatterns;
 import com.mojang.brigadier.Command;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentContents;
 import net.minecraft.network.chat.contents.TranslatableContents;
@@ -79,19 +79,19 @@ public final class AutoGgModule extends EAzyModule {
 
 	private void registerHooks() {
 		ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) ->
-				dispatcher.register(ClientCommands.literal("autogg")
+				dispatcher.register(ClientCommandManager.literal("autogg")
 						.executes(context -> {
 							ModuleManager.toggle(this);
 							context.getSource().sendFeedback(Component.literal("AutoGG: " + (isEnabled() ? "AÇIK" : "KAPALI")));
 							return Command.SINGLE_SUCCESS;
 						})
-						.then(ClientCommands.literal("debug").executes(context -> {
+						.then(ClientCommandManager.literal("debug").executes(context -> {
 							debug = !debug;
 							context.getSource().sendFeedback(Component.literal(
 									"AutoGG öğrenme (debug): " + (debug ? "AÇIK" : "KAPALI")));
 							return Command.SINGLE_SUCCESS;
 						}))
-						.then(ClientCommands.literal("forget").executes(context -> {
+						.then(ClientCommandManager.literal("forget").executes(context -> {
 							int removed = LearnedPatterns.clear();
 							context.getSource().sendFeedback(Component.literal(
 									"AutoGG: öğrenilen mesajlar silindi (" + removed + ")"));
@@ -305,7 +305,7 @@ public final class AutoGgModule extends EAzyModule {
 		if (template == null) {
 			return;
 		}
-		mc.player.sendSystemMessage(Component.literal("[AutoGG] Yeni ölüm mesajı öğrenildi: " + template));
+		mc.player.displayClientMessage(Component.literal("[AutoGG] Yeni ölüm mesajı öğrenildi: " + template), false);
 		String victim = LearnedPatterns.match(plain, me);
 		if (victim != null) {
 			markDeath(victim);
@@ -327,7 +327,7 @@ public final class AutoGgModule extends EAzyModule {
 
 	private static void debugLog(Minecraft mc, String text) {
 		if (debug && mc.player != null) {
-			mc.player.sendSystemMessage(Component.literal("[AutoGG debug] " + text));
+			mc.player.displayClientMessage(Component.literal("[AutoGG debug] " + text), false);
 		}
 	}
 
@@ -396,7 +396,7 @@ public final class AutoGgModule extends EAzyModule {
 	}
 
 	/** HudMixin tarafından her karede çağrılır: XP seviyesinin üstünde kırmızı totem sayacı. */
-	public static void renderTargetTotems(GuiGraphicsExtractor graphics) {
+	public static void renderTargetTotems(GuiGraphics graphics) {
 		if (!active() || targetName == null) {
 			return;
 		}
@@ -418,7 +418,7 @@ public final class AutoGgModule extends EAzyModule {
 			}
 		}
 		int count = targetDead ? 0 : targetTotemsLastKnown;
-		graphics.centeredText(client.font, Component.literal(Integer.toString(count)),
+		graphics.drawCenteredString(client.font, Component.literal(Integer.toString(count)),
 				graphics.guiWidth() / 2, graphics.guiHeight() - 57, 0xFFFF3B3B);
 	}
 

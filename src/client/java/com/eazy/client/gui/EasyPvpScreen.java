@@ -3,7 +3,7 @@ package com.eazy.client.gui;
 import com.eazy.client.core.EAzyModule;
 import com.eazy.client.core.ModuleManager;
 import com.eazy.client.modules.EasyPvpModule;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -75,13 +75,13 @@ public class EasyPvpScreen extends Screen {
 
 	@Override
 	public void onClose() {
-		this.minecraft.gui.setScreen(this.parent);
+		this.minecraft.setScreen(this.parent);
 	}
 
 	@Override
-	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
-		super.extractRenderState(graphics, mouseX, mouseY, delta);
+	public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+		super.render(graphics, mouseX, mouseY, delta);
 		String text = this.title.getString();
-		graphics.text(this.font, text, (this.width - this.font.width(text)) / 2, 20, 0xFFFFFFFF, true);
+		graphics.drawString(this.font, text, (this.width - this.font.width(text)) / 2, 20, 0xFFFFFFFF, true);
 	}
 }

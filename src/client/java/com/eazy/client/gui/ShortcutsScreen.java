@@ -3,7 +3,7 @@ package com.eazy.client.gui;
 import com.eazy.client.core.ModuleManager;
 import com.eazy.client.core.Setting;
 import com.eazy.client.modules.ShortcutsModule;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
@@ -47,20 +47,20 @@ public class ShortcutsScreen extends Screen {
 	@Override
 	public void onClose() {
 		ModuleManager.saveAsync();
-		this.minecraft.gui.setScreen(this.parent);
+		this.minecraft.setScreen(this.parent);
 	}
 
 	@Override
-	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
-		super.extractRenderState(graphics, mouseX, mouseY, delta);
+	public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+		super.render(graphics, mouseX, mouseY, delta);
 		String text = this.title.getString();
-		graphics.text(this.font, text, (this.width - this.font.width(text)) / 2, 14, 0xFFFFFFFF, true);
+		graphics.drawString(this.font, text, (this.width - this.font.width(text)) / 2, 14, 0xFFFFFFFF, true);
 		int y = TOP + 6;
 		for (int i = 1; i <= ShortcutsModule.SLOTS; i++) {
-			graphics.text(this.font, Integer.toString(i), this.width / 2 - 104, y, 0xFFAAAAAA, true);
+			graphics.drawString(this.font, Integer.toString(i), this.width / 2 - 104, y, 0xFFAAAAAA, true);
 			y += ROW;
 		}
-		graphics.centeredText(this.font, Component.translatable("eazy.shortcuts.hint"),
+		graphics.drawCenteredString(this.font, Component.translatable("eazy.shortcuts.hint"),
 				this.width / 2, this.height - 42, 0xFFAAAAAA);
 	}
 }

@@ -80,8 +80,8 @@ public final class FpsProfileModule extends EAzyModule {
 			current.set(next);
 			com.eazy.client.core.ModuleManager.saveAsync();
 			if (client.player != null) {
-				client.player.sendOverlayMessage(Component.translatable("eazy.fps.profile",
-						Component.translatable("eazy.fps.profile." + PROFILES[next].id())));
+				client.player.displayClientMessage(Component.translatable("eazy.fps.profile",
+						Component.translatable("eazy.fps.profile." + PROFILES[next].id())), true);
 			}
 		}
 	}
