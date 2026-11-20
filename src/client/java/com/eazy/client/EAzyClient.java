@@ -10,7 +10,6 @@ import com.eazy.client.modules.ItemOutlineModule;
 import com.eazy.client.modules.NoParticlesModule;
 import com.eazy.client.modules.UiModule;
 import com.eazy.client.modules.ShortcutsModule;
-import com.eazy.client.modules.TestModule;
 import com.eazy.client.modules.ZoomModule;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
@@ -38,7 +37,6 @@ public final class EAzyClient implements ClientModInitializer {
 		ModuleManager.register(new UiModule());
 		ModuleManager.register(new ItemOutlineModule());
 		ModuleManager.register(new AutoGgModule());
-		ModuleManager.register(new TestModule()); // GEÇİCİ, son aşamada silinecek
 
 		// 2) Kayıtlı ayarları oku ve modüllere uygula
 		ConfigManager.load();
