@@ -103,7 +103,7 @@ public class ClickGuiScreen extends Screen {
 	private final Map<String, String> texts = new HashMap<>();
 
 	// Animasyon (hedefe doğru ilerleyen değerler)
-	private final Map<Object, float[]> anim = new IdentityHashMap<>();
+	private final Map<Object, float[]> anim = new HashMap<>();
 	private float openAnim;
 	private float catFade;
 	private float scroll;
