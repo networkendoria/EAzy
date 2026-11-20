@@ -21,7 +21,7 @@ jobs:
           distribution: 'microsoft'
       - run: chmod +x ./gradlew
       - name: resolve minecraft jars
-        run: ./gradlew compileClientJava --no-daemon -q
+        run: ./gradlew compileClientJava --no-daemon -q || true
       - name: javap
         env:
           CLASSES: ${{ inputs.classes }}
