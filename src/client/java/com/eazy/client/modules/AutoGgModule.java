@@ -6,7 +6,7 @@ import com.eazy.client.core.EAzyModule;
 import com.eazy.client.core.ModuleManager;
 import com.eazy.client.modules.autogg.LearnedPatterns;
 import com.mojang.brigadier.Command;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
@@ -79,19 +79,19 @@ public final class AutoGgModule extends EAzyModule {
 
 	private void registerHooks() {
 		ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) ->
-				dispatcher.register(ClientCommandManager.literal("autogg")
+				dispatcher.register(ClientCommands.literal("autogg")
 						.executes(context -> {
 							ModuleManager.toggle(this);
 							context.getSource().sendFeedback(Component.literal("AutoGG: " + (isEnabled() ? "AÇIK" : "KAPALI")));
 							return Command.SINGLE_SUCCESS;
 						})
-						.then(ClientCommandManager.literal("debug").executes(context -> {
+						.then(ClientCommands.literal("debug").executes(context -> {
 							debug = !debug;
 							context.getSource().sendFeedback(Component.literal(
 									"AutoGG öğrenme (debug): " + (debug ? "AÇIK" : "KAPALI")));
 							return Command.SINGLE_SUCCESS;
 						}))
-						.then(ClientCommandManager.literal("forget").executes(context -> {
+						.then(ClientCommands.literal("forget").executes(context -> {
 							int removed = LearnedPatterns.clear();
 							context.getSource().sendFeedback(Component.literal(
 									"AutoGG: öğrenilen mesajlar silindi (" + removed + ")"));
