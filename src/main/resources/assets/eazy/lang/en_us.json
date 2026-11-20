@@ -35,5 +35,12 @@
 	"setting.eazy.ui.hotbar_numbers": "Hotbar numbers",
 	"setting.eazy.item_outline.hotbar": "Hotbar outline",
 	"setting.eazy.item_outline.inventory": "Inventory outline",
-	"module.eazy.autogg": "AutoGG"
+	"module.eazy.autogg": "AutoGG",
+	"category.eazy.performance": "Performance",
+	"category.eazy.zoom": "Zoom",
+	"category.eazy.shortcuts": "Shortcuts",
+	"category.eazy.interface": "Interface",
+	"category.eazy.integration": "Integration",
+	"category.eazy.debug": "Debug",
+	"eazy.menu.search": "Search"
 }
