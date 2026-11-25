@@ -1,22 +1,23 @@
 {
 	"schemaVersion": 1,
-	"id": "eazy",
+	"id": "lopi",
 	"version": "${version}",
-	"name": "EAzy Client",
+	"name": "Lopi Client",
+	"icon": "assets/lopi/icon.png",
 	"description": "Kişisel, modüler Minecraft client.",
 	"authors": [
-		"EAzy"
+		"Lopi"
 	],
 	"license": "All-Rights-Reserved",
 	"environment": "client",
 	"entrypoints": {
 		"client": [
-			"com.eazy.client.EAzyClient"
+			"com.lopi.client.LopiClient"
 		]
 	},
 	"mixins": [
 		{
-			"config": "eazy.client.mixins.json",
+			"config": "lopi.client.mixins.json",
 			"environment": "client"
 		}
 	],

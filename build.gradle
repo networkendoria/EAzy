@@ -10,7 +10,7 @@ loom {
 	splitEnvironmentSourceSets()
 
 	mods {
-		"eazy" {
+		"lopi" {
 			sourceSet sourceSets.main
 			sourceSet sourceSets.client
 		}
