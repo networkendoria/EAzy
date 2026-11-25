@@ -50,7 +50,8 @@ public final class ZoomModule extends LopiModule {
 		double dt = lastNanos == 0 ? 0.0 : Math.min((now - lastNanos) / 1_000_000_000.0, 0.1);
 		lastNanos = now;
 
-		double target = key.isDown() ? 1.0 / level.get() : 1.0;
+		boolean zooming = key.isDown() && !com.lopi.client.input.LopiKeys.rightShiftDown();
+		double target = zooming ? 1.0 / level.get() : 1.0;
 		if (smooth.get()) {
 			current += (target - current) * (1.0 - Math.exp(-dt * 14.0));
 			if (Math.abs(target - current) < 0.0005) {

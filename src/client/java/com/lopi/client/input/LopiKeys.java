@@ -17,6 +17,19 @@ public final class LopiKeys {
 	private LopiKeys() {
 	}
 
+	/** Verilen GLFW tuşu şu anda basılı mı (KeyMapping kaydı gerektirmez). */
+	public static boolean isDown(int glfwKey) {
+		if (glfwKey <= 0) {
+			return false;
+		}
+		return InputConstants.isKeyDown(net.minecraft.client.Minecraft.getInstance().getWindow(), glfwKey);
+	}
+
+	/** Sağ Shift basılı mı (menü kısayolu ve zoom bastırma için). */
+	public static boolean rightShiftDown() {
+		return isDown(org.lwjgl.glfw.GLFW.GLFW_KEY_RIGHT_SHIFT);
+	}
+
 	/**
 	 * Yeni bir klavye tuşu kaydeder.
 	 *

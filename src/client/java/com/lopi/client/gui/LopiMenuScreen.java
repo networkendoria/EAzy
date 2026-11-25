@@ -1,13 +1,21 @@
 package com.lopi.client.gui;
 
-import com.lopi.client.core.Category;
 import com.lopi.client.core.LopiModule;
 import com.lopi.client.core.ModuleManager;
 import com.lopi.client.core.Setting;
-import com.lopi.client.modules.FpsProfileModule;
+import com.lopi.client.core.ModsInfo;
+import com.lopi.client.input.LopiKeys;
+import com.lopi.client.modules.CrosshairModule;
+import com.lopi.client.modules.EasyPvpModule;
+import com.lopi.client.modules.PerformanceModule;
+import com.lopi.client.modules.ShortcutsModule;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.EditBox;
@@ -29,7 +37,7 @@ import java.util.Map;
  * modül kartları ve kartların içinde açılan ayarlar (anahtar, kaydırıcı, tuş atama).
  * Tüm metinler Türkçe dil dosyasından gelir. Fare ve dokunmatik (sürükleyerek kaydırma) desteklenir.
  */
-public class ClickGuiScreen extends Screen {
+public class LopiMenuScreen extends Screen {
 	// Renk paleti (ARGB)
 	private static final int BG = 0xFF0B0A10;
 	private static final int SURFACE = 0xFF15131D;
@@ -52,13 +60,17 @@ public class ClickGuiScreen extends Screen {
 
 	// Tıklanabilir alan türleri
 	private static final int H_CLOSE = 0;
-	private static final int H_CATEGORY = 1;
+	private static final int H_TAB = 1;
 	private static final int H_TOGGLE = 2;
 	private static final int H_EXPAND = 3;
 	private static final int H_BOOL = 4;
 	private static final int H_SLIDER = 5;
 	private static final int H_KEY = 6;
 	private static final int H_ADVANCED = 7;
+	private static final int H_RUN = 8;
+	private static final int H_EDIT = 9;
+	private static final int H_ADD = 10;
+	private static final int H_MODE = 11;
 
 	private static final class Hit {
 		int x1;
@@ -74,8 +86,26 @@ public class ClickGuiScreen extends Screen {
 		}
 	}
 
+	/** Sol taraftaki sekmeler. */
+	private enum Tab {
+		GENERAL("general"), CROSSHAIR("crosshair"), MODS("mods"), SETTINGS("settings");
+
+		final String key;
+
+		Tab(String key) {
+			this.key = key;
+		}
+	}
+
+	private static final Identifier LOGO = Identifier.fromNamespaceAndPath("lopi", "textures/gui/logo.png");
+	private final ItemStack[] tabIcons = {
+			new ItemStack(Items.NETHER_STAR), new ItemStack(Items.SPYGLASS),
+			new ItemStack(Items.CHEST), new ItemStack(Items.REPEATER)
+	};
+
 	// Oturum boyunca hatırlanan durum
-	private static Category selected = Category.PERFORMANCE;
+	private static Tab selected = Tab.GENERAL;
+	private int hoverMode = -1;
 	private static String query = "";
 
 	private final Screen parent;
@@ -94,7 +124,6 @@ public class ClickGuiScreen extends Screen {
 
 	// Durum
 	private EditBox search;
-	private final List<Category> categories = new ArrayList<>();
 	private final List<LopiModule> visible = new ArrayList<>();
 	private boolean dirty = true;
 	private final Map<LopiModule, Boolean> expanded = new IdentityHashMap<>();
@@ -120,7 +149,7 @@ public class ClickGuiScreen extends Screen {
 	private Hit sliderHit;
 	private KeyMapping listening;
 
-	public ClickGuiScreen(Screen parent) {
+	public LopiMenuScreen(Screen parent) {
 		super(Component.translatable("screen.lopi.settings"));
 		this.parent = parent;
 		this.version = FabricLoader.getInstance().getModContainer("lopi")
@@ -189,28 +218,15 @@ public class ClickGuiScreen extends Screen {
 
 	@Override
 	protected void init() {
-		pw = Math.min(this.width - 12, 440);
-		ph = Math.min(this.height - 12, 270);
+		pw = Math.min(this.width - 12, 470);
+		ph = Math.min(this.height - 12, 290);
 		px = (this.width - pw) / 2;
 		py = (this.height - ph) / 2;
-		sideW = pw >= 300 ? 92 : 72;
+		sideW = pw >= 300 ? 104 : 76;
 		cx = px + sideW;
 		cy = py + HEADER_H;
 		cw = pw - sideW;
 		ch = ph - HEADER_H;
-
-		categories.clear();
-		for (Category c : Category.values()) {
-			for (LopiModule m : ModuleManager.all()) {
-				if (m.category() == c) {
-					categories.add(c);
-					break;
-				}
-			}
-		}
-		if (!categories.contains(selected) && !categories.isEmpty()) {
-			selected = categories.get(0);
-		}
 
 		for (LopiModule m : ModuleManager.all()) {
 			boolean custom = m.createSettingsScreen(this) != null;
@@ -228,6 +244,11 @@ public class ClickGuiScreen extends Screen {
 				h += ROW_H;
 			}
 			bodyHeight.put(m, h > 0 ? h + 8 : 0);
+		}
+
+		LopiModule crosshairModule = module("crosshair");
+		if (crosshairModule != null) {
+			expanded.put(crosshairModule, true);
 		}
 
 		int sw = Math.min(140, pw / 3);
@@ -253,12 +274,8 @@ public class ClickGuiScreen extends Screen {
 	private void rebuildVisible() {
 		visible.clear();
 		String q = query.toLowerCase(Locale.ROOT).trim();
-		for (LopiModule m : ModuleManager.all()) {
-			if (q.isEmpty()) {
-				if (m.category() == selected) {
-					visible.add(m);
-				}
-			} else {
+		if (!q.isEmpty()) {
+			for (LopiModule m : ModuleManager.all()) {
 				String name = t(m.translationKey()).toLowerCase(Locale.ROOT);
 				String desc = t(m.translationKey() + ".desc").toLowerCase(Locale.ROOT);
 				if (name.contains(q) || desc.contains(q)) {
@@ -267,6 +284,15 @@ public class ClickGuiScreen extends Screen {
 			}
 		}
 		dirty = false;
+	}
+
+	private static LopiModule module(String id) {
+		for (LopiModule m : ModuleManager.all()) {
+			if (m.id().equals(id)) {
+				return m;
+			}
+		}
+		return null;
 	}
 
 	// ---------------------------------------------------------------- çizim
@@ -309,11 +335,9 @@ public class ClickGuiScreen extends Screen {
 		g.fill(px, oy, px + pw, oy + HEADER_H, alpha(SURFACE, ga));
 		g.fill(px, oy + HEADER_H - 1, px + pw, oy + HEADER_H, alpha(BORDER, ga));
 		// Logo
-		g.fill(px + 8, oy + 7, px + 24, oy + 23, alpha(ACCENT, ga));
-		g.fill(px + 8, oy + 7, px + 24, oy + 8, alpha(LAVENDER, ga * 0.6f));
-		g.centeredText(this.font, Component.literal("E").withStyle(ChatFormatting.BOLD), px + 16, oy + 11, alpha(TEXT, ga));
-		g.text(this.font, Component.literal("Lopi").withStyle(ChatFormatting.BOLD), px + 30, oy + 6, alpha(TEXT, ga), false);
-		int vx = px + 30 + this.font.width("Lopi") + 4;
+		g.blit(RenderPipelines.GUI_TEXTURED, LOGO, px + 7, oy + 5, 0f, 0f, 20, 20, 64, 64, 64, 64);
+		g.text(this.font, Component.literal("Lopi").withStyle(ChatFormatting.BOLD), px + 32, oy + 6, alpha(TEXT, ga), false);
+		int vx = px + 32 + this.font.width("Lopi") + 4;
 		g.text(this.font, "v" + version, vx, oy + 6, alpha(MUTED, ga), false);
 		// Etkin durum göstergesi
 		int active = 0;
@@ -322,8 +346,8 @@ public class ClickGuiScreen extends Screen {
 				active++;
 			}
 		}
-		g.fill(px + 30, oy + 19, px + 34, oy + 23, alpha(ACCENT, ga));
-		g.text(this.font, String.format(t("lopi.gui.active_count"), active), px + 38, oy + 17, alpha(LAVENDER, ga), false);
+		g.fill(px + 32, oy + 19, px + 36, oy + 23, alpha(ACCENT, ga));
+		g.text(this.font, String.format(t("lopi.gui.active_count"), active), px + 40, oy + 17, alpha(LAVENDER, ga), false);
 
 		// Arama kutusu zemini
 		int sw = Math.min(140, pw / 3);
@@ -349,37 +373,24 @@ public class ClickGuiScreen extends Screen {
 		g.fill(px + sideW - 1, top, px + sideW, oy + ph, alpha(BORDER, ga));
 		int y = top + 8;
 		boolean searching = !query.isBlank();
-		for (Category c : categories) {
-			boolean sel = c == selected && !searching;
-			boolean over = mx >= px + 4 && mx < px + sideW - 5 && my >= y && my < y + 22;
-			float s = approach(c, sel ? 1f : 0f, 9f, dt);
-			float hv = approach(new ExKey(c), over ? 1f : 0f, 10f, dt);
-			int bg = mix(SURFACE, CARD, Math.max(s, hv * 0.7f));
-			g.fill(px + 5, y, px + sideW - 6, y + 22, alpha(bg, ga));
-			g.fill(px + 5, y, px + 5 + Math.round(2 * s), y + 22, alpha(ACCENT, ga));
-			String name = t("category.lopi." + c.name().toLowerCase(Locale.ROOT));
-			g.text(this.font, fit(name, sideW - 36), px + 12, y + 7, alpha(mix(MUTED, TEXT, Math.max(s, hv)), ga), false);
-			int total = 0;
-			int on = 0;
-			for (LopiModule m : ModuleManager.all()) {
-				if (m.category() == c) {
-					total++;
-					if (m.isEnabled()) {
-						on++;
-					}
-				}
-			}
-			String cnt = on + "/" + total;
-			g.text(this.font, cnt, px + sideW - 9 - this.font.width(cnt), y + 7, alpha(s > 0.5f ? LAVENDER : MUTED, ga), false);
-			hit(px + 4, y, px + sideW - 5, y + 22, H_CATEGORY, c, null);
-			y += 25;
+		Tab[] tabs = Tab.values();
+		for (int i = 0; i < tabs.length; i++) {
+			Tab tab = tabs[i];
+			boolean sel = tab == selected && !searching;
+			boolean over = mx >= px + 4 && mx < px + sideW - 5 && my >= y && my < y + 28;
+			float sv = approach(tab, sel ? 1f : 0f, 9f, dt);
+			float hv = approach(new ExKey(tab), over ? 1f : 0f, 10f, dt);
+			int bg = mix(SURFACE, CARD, Math.max(sv, hv * 0.7f));
+			g.fill(px + 5, y, px + sideW - 6, y + 28, alpha(bg, ga));
+			g.fill(px + 5, y, px + 5 + Math.round(2 * sv), y + 28, alpha(ACCENT, ga));
+			g.item(tabIcons[i], px + 10, y + 6);
+			g.text(this.font, fit(t("lopi.tab." + tab.key), sideW - 40), px + 30, y + 10,
+					alpha(mix(MUTED, TEXT, Math.max(sv, hv)), ga), false);
+			hit(px + 4, y, px + sideW - 5, y + 28, H_TAB, tab, null);
+			y += 31;
 		}
-		// Alt bilgi: algılanan FPS modları
-		List<String> found = FpsProfileModule.detectedMods();
-		if (!found.isEmpty()) {
-			String line = fit(String.format(t("lopi.fps.detected"), String.join(", ", found)), sideW - 12);
-			g.text(this.font, line, px + 7, oy + ph - 13, alpha(MUTED, ga), false);
-		}
+		// Alt bilgi: açma kısayolu
+		g.text(this.font, fit(t("lopi.gui.open_hint"), sideW - 12), px + 7, oy + ph - 13, alpha(MUTED, ga), false);
 	}
 
 	private void drawContent(GuiGraphicsExtractor g, int mx, int my, float ga, int oy, float dt) {
@@ -402,19 +413,22 @@ public class ClickGuiScreen extends Screen {
 		int y = top + 8 - Math.round(scroll) + fy;
 
 		boolean searching = !query.isBlank();
-		String label = searching ? t("lopi.gui.results")
-				: t("category.lopi." + selected.name().toLowerCase(Locale.ROOT));
-		g.text(this.font, label, cardX, y, alpha(LAVENDER, fade), false);
-		g.fill(cardX, y + 11, cardX + 18, y + 12, alpha(ACCENT, fade));
-		y += 18;
-
-		if (visible.isEmpty()) {
-			g.text(this.font, fit(t("lopi.gui.no_results"), cardW), cardX, y + 4, alpha(MUTED, fade), false);
-			y += 20;
-		}
-		for (LopiModule m : visible) {
-			y = drawCard(g, m, cardX, y, cardW, top, mx, my, fade, dt);
-			y += GAP;
+		if (searching) {
+			y = section(g, t("lopi.gui.results"), cardX, y, fade);
+			if (visible.isEmpty()) {
+				g.text(this.font, fit(t("lopi.gui.no_results"), cardW), cardX, y + 4, alpha(MUTED, fade), false);
+				y += 20;
+			}
+			for (LopiModule m : visible) {
+				y = drawCard(g, m, cardX, y, cardW, top, mx, my, fade, dt) + GAP;
+			}
+		} else {
+			switch (selected) {
+				case GENERAL -> y = drawGeneral(g, cardX, y, cardW, top, mx, my, fade, dt);
+				case CROSSHAIR -> y = drawCrosshair(g, cardX, y, cardW, top, mx, my, fade, dt);
+				case MODS -> y = drawMods(g, cardX, y, cardW, top, fade);
+				case SETTINGS -> y = drawSettings(g, cardX, y, cardW, top, mx, my, fade, dt);
+			}
 		}
 		contentHeight = (y + Math.round(scroll)) - (top + 8 - fy) + 4;
 
@@ -433,6 +447,197 @@ public class ClickGuiScreen extends Screen {
 		} else {
 			g.centeredText(this.font, fit(t("lopi.gui.hint"), cw - 12), cx + cw / 2, oy + ph - 12, alpha(MUTED, ga * 0.8f));
 		}
+	}
+
+	// ---------------------------------------------------------------- sekmeler
+
+	private int section(GuiGraphicsExtractor g, String text, int x, int y, float fade) {
+		g.text(this.font, text, x, y, alpha(LAVENDER, fade), false);
+		g.fill(x, y + 11, x + 18, y + 12, alpha(ACCENT, fade));
+		return y + 18;
+	}
+
+	private int drawGeneral(GuiGraphicsExtractor g, int x, int y, int w, int top, int mx, int my, float fade, float dt) {
+		y = section(g, t("lopi.tab.general"), x, y, fade);
+		for (String id : new String[]{"autogg", "easypvp"}) {
+			LopiModule m = module(id);
+			if (m != null) {
+				y = drawCard(g, m, x, y, w, top, mx, my, fade, dt) + GAP;
+			}
+		}
+		ShortcutsModule sc = ShortcutsModule.get();
+		y = section(g, t("lopi.shortcuts.title"), x, y + 2, fade);
+		if (sc != null) {
+			for (ShortcutsModule.Entry e : sc.entries()) {
+				y = drawShortcutCard(g, e, x, y, w, top, mx, my, fade, dt) + GAP;
+			}
+			if (sc.entries().size() < ShortcutsModule.MAX_ENTRIES) {
+				y = button(g, x, y, w, 22, "+  " + t("lopi.shortcuts.add"), "add", true, H_ADD, null, top, mx, my, fade, dt) + GAP;
+			}
+		}
+		return y;
+	}
+
+	private int drawShortcutCard(GuiGraphicsExtractor g, ShortcutsModule.Entry e, int x, int y, int w, int top,
+								 int mx, int my, float fade, float dt) {
+		int hgt = 36;
+		boolean rtp = "rtp".equals(e.id);
+		if (inContent(y, y + hgt)) {
+			g.fill(x, y, x + w, y + hgt, alpha(BORDER, fade));
+			g.fill(x + 1, y + 1, x + w - 1, y + hgt - 1, alpha(CARD, fade));
+			int editW = this.font.width(t("lopi.gui.edit")) + 14;
+			String runLabel = e.name.isBlank() ? t("lopi.shortcuts.unnamed") : e.name;
+			int runW = Math.min(w / 3, Math.max(56, this.font.width(runLabel) + 16));
+			int textW = w - editW - runW - 36;
+			String title = rtp ? t("lopi.rtp.title") : (e.name.isBlank() ? t("lopi.shortcuts.unnamed") : e.name);
+			g.text(this.font, fit(title, textW), x + 10, y + 8, alpha(TEXT, fade), false);
+			String sub = rtp ? t("lopi.rtp.desc") : e.command;
+			if (e.key > 0) {
+				sub += "  [" + InputConstants.Type.KEYSYM.getOrCreate(e.key).getDisplayName().getString() + "]";
+			}
+			g.text(this.font, fit(sub, textW), x + 10, y + 21, alpha(MUTED, fade), false);
+			int bx = x + w - 8 - editW;
+			buttonAt(g, bx, y + 8, editW, 20, t("lopi.gui.edit"), "edit" + e.id, false, H_EDIT, e, top, mx, my, fade, dt);
+			int rx = bx - 6 - runW;
+			buttonAt(g, rx, y + 8, runW, 20, runLabel, "run" + e.id, true, H_RUN, e, top, mx, my, fade, dt);
+		}
+		return y + hgt;
+	}
+
+	private int button(GuiGraphicsExtractor g, int x, int y, int w, int h, String label, Object key, boolean primary,
+					   int type, Object data, int top, int mx, int my, float fade, float dt) {
+		if (inContent(y, y + h)) {
+			buttonAt(g, x, y, w, h, label, key, primary, type, data, top, mx, my, fade, dt);
+		}
+		return y + h;
+	}
+
+	private void buttonAt(GuiGraphicsExtractor g, int x, int y, int w, int h, String label, Object key, boolean primary,
+						  int type, Object data, int top, int mx, int my, float fade, float dt) {
+		boolean over = mx >= x && mx < x + w && my >= Math.max(y, top) && my < Math.min(y + h, top + ch)
+				&& mx >= cx && mx < cx + cw;
+		float hv = approach(new ExKey(key), over ? 1f : 0f, 10f, dt);
+		int edge = mix(primary ? ACCENT : BORDER, LAVENDER, hv * 0.8f);
+		g.fill(x, y, x + w, y + h, alpha(edge, fade));
+		g.fill(x + 1, y + 1, x + w - 1, y + h - 1, alpha(primary ? mix(0xFF2A1F4D, ACCENT, hv * 0.5f) : mix(BG, CARD_HOVER, hv), fade));
+		g.centeredText(this.font, fit(label, w - 8), x + w / 2, y + (h - 8) / 2, alpha(TEXT, fade));
+		if (over || (my >= top && my < top + ch)) {
+			hit(x, Math.max(y, top), x + w, Math.min(y + h, top + ch), type, data, null);
+		}
+	}
+
+	private int drawCrosshair(GuiGraphicsExtractor g, int x, int y, int w, int top, int mx, int my, float fade, float dt) {
+		y = section(g, t("lopi.tab.crosshair"), x, y, fade);
+		CrosshairModule c = CrosshairModule.get();
+		int boxH = 78;
+		if (inContent(y, y + boxH)) {
+			g.fill(x, y, x + w, y + boxH, alpha(BORDER, fade));
+			g.fill(x + 1, y + 1, x + w - 1, y + boxH - 1, alpha(0xFF2D4A2B, fade));
+			for (int i = 0; i < 6; i++) {
+				g.fill(x + 1, y + 1 + i * 13, x + w - 1, y + 1 + i * 13 + 13, alpha(i % 2 == 0 ? 0xFF35592F : 0xFF2D4A2B, fade * 0.8f));
+			}
+			if (c != null) {
+				c.draw(g, x + w / 2, y + boxH / 2);
+			}
+			g.text(this.font, t("lopi.crosshair.preview"), x + 6, y + 5, alpha(0xFFE6E0F5, fade), true);
+		}
+		y += boxH + GAP;
+		if (c != null) {
+			y = drawCard(g, c, x, y, w, top, mx, my, fade, dt) + GAP;
+		}
+		return y;
+	}
+
+	private int drawMods(GuiGraphicsExtractor g, int x, int y, int w, int top, float fade) {
+		y = section(g, t("lopi.mods.recommended"), x, y, fade);
+		for (String[] r : ModsInfo.RECOMMENDED) {
+			boolean on = ModsInfo.isLoaded(r[0]);
+			y = modRow(g, r[1], null, on ? t("lopi.mods.installed") : t("lopi.mods.missing"), on, x, y, w, top, fade);
+		}
+		y = section(g, String.format(t("lopi.mods.installed_list"), ModsInfo.installed().size()), x, y + 6, fade);
+		for (ModsInfo.Entry e : ModsInfo.installed()) {
+			y = modRow(g, e.name(), e.version(), t("lopi.mods.installed"), true, x, y, w, top, fade);
+		}
+		g.text(this.font, fit(t("lopi.mods.note"), w), x, y + 4, alpha(MUTED, fade), false);
+		return y + 18;
+	}
+
+	private int modRow(GuiGraphicsExtractor g, String name, String version, String badge, boolean ok,
+					   int x, int y, int w, int top, float fade) {
+		int hgt = 22;
+		if (inContent(y, y + hgt)) {
+			g.fill(x, y, x + w, y + hgt, alpha(BORDER, fade));
+			g.fill(x + 1, y + 1, x + w - 1, y + hgt - 1, alpha(CARD, fade));
+			int bw = this.font.width(badge) + 12;
+			g.fill(x + w - 6 - bw, y + 4, x + w - 6, y + hgt - 4, alpha(ok ? 0xFF2A4A3A : 0xFF3A2F45, fade));
+			g.centeredText(this.font, badge, x + w - 6 - bw / 2, y + 7, alpha(ok ? 0xFF8CF0B4 : MUTED, fade));
+			String left = version == null ? name : name + "  " + version;
+			g.text(this.font, fit(left, w - bw - 22), x + 8, y + 7, alpha(ok ? TEXT : TEXT_DIM, fade), false);
+		}
+		return y + hgt + 3;
+	}
+
+	private int drawSettings(GuiGraphicsExtractor g, int x, int y, int w, int top, int mx, int my, float fade, float dt) {
+		y = section(g, t("lopi.perf.title"), x, y, fade);
+		PerformanceModule perf = PerformanceModule.get();
+		int current = perf == null ? -1 : perf.mode();
+		int bh = 40;
+		int gap = 6;
+		int bw = (w - 2 * gap) / 3;
+		hoverMode = -1;
+		for (int i = 0; i < 3; i++) {
+			int bx = x + i * (bw + gap);
+			if (!inContent(y, y + bh)) {
+				continue;
+			}
+			boolean over = mx >= bx && mx < bx + bw && my >= Math.max(y, top) && my < Math.min(y + bh, top + ch)
+					&& mx >= cx && mx < cx + cw;
+			if (over) {
+				hoverMode = i;
+			}
+			float sel = approach(new OnKey(PerformanceModule.IDS[i]), current == i ? 1f : 0f, 9f, dt);
+			float hv = approach(new ExKey(PerformanceModule.IDS[i]), over ? 1f : 0f, 10f, dt);
+			g.fill(bx, y, bx + bw, y + bh, alpha(mix(BORDER, ACCENT, Math.max(sel, hv * 0.6f)), fade));
+			g.fill(bx + 1, y + 1, bx + bw - 1, y + bh - 1, alpha(mix(CARD, 0xFF2A1F4D, sel), fade));
+			g.centeredText(this.font, Component.literal(t("lopi.perf.mode." + PerformanceModule.IDS[i]))
+					.withStyle(ChatFormatting.BOLD), bx + bw / 2, y + 8, alpha(mix(TEXT_DIM, TEXT, Math.max(sel, hv)), fade));
+			g.centeredText(this.font, fit(t("lopi.perf.short." + PerformanceModule.IDS[i]), bw - 8), bx + bw / 2, y + 22,
+					alpha(sel > 0.5f ? LAVENDER : MUTED, fade));
+			hit(bx, Math.max(y, top), bx + bw, Math.min(y + bh, top + ch), H_MODE, i, null);
+		}
+		y += bh + GAP;
+		int shown = hoverMode >= 0 ? hoverMode : current;
+		String info = shown >= 0 ? t("lopi.perf.warn." + PerformanceModule.IDS[shown]) : t("lopi.perf.warn.none");
+		List<net.minecraft.util.FormattedCharSequence> lines = this.font.split(Component.literal(info), w - 20);
+		int boxH = lines.size() * 10 + 14;
+		if (inContent(y, y + boxH)) {
+			g.fill(x, y, x + w, y + boxH, alpha(shown == PerformanceModule.UPS || shown == PerformanceModule.ECO ? 0xFF6B4A1E : BORDER, fade));
+			g.fill(x + 1, y + 1, x + w - 1, y + boxH - 1, alpha(0xFF1A1620, fade));
+			g.text(this.font, "!", x + 6, y + 7, alpha(0xFFFFC857, fade), false);
+			for (int i = 0; i < lines.size(); i++) {
+				g.text(this.font, lines.get(i), x + 16, y + 7 + i * 10, alpha(TEXT_DIM, fade), false);
+			}
+		}
+		y += boxH + GAP + 4;
+
+		y = section(g, t("lopi.settings.modules"), x, y, fade);
+		for (String id : new String[]{"zoom", "no_particles", "ui", "item_outline"}) {
+			LopiModule m = module(id);
+			if (m != null) {
+				y = drawCard(g, m, x, y, w, top, mx, my, fade, dt) + GAP;
+			}
+		}
+		y = section(g, t("lopi.settings.info"), x, y + 2, fade);
+		for (String key : new String[]{"lopi.settings.info.menu", "lopi.settings.info.config", "lopi.settings.info.keys"}) {
+			for (net.minecraft.util.FormattedCharSequence line : this.font.split(Component.literal(t(key)), w)) {
+				if (inContent(y, y + 10)) {
+					g.text(this.font, line, x, y, alpha(MUTED, fade), false);
+				}
+				y += 10;
+			}
+			y += 3;
+		}
+		return y;
 	}
 
 	private int drawCard(GuiGraphicsExtractor g, LopiModule m, int x, int y, int w, int top, int mx, int my,
@@ -687,9 +892,9 @@ public class ClickGuiScreen extends Screen {
 	private void act(Hit h) {
 		switch (h.type) {
 			case H_CLOSE -> this.onClose();
-			case H_CATEGORY -> {
+			case H_TAB -> {
 				if (selected != h.a || !query.isEmpty()) {
-					selected = (Category) h.a;
+					selected = (Tab) h.a;
 					query = "";
 					search.setValue("");
 					dirty = true;
@@ -698,7 +903,26 @@ public class ClickGuiScreen extends Screen {
 					catFade = 0f;
 				}
 			}
-			case H_TOGGLE -> ModuleManager.toggle((LopiModule) h.a);
+			case H_TOGGLE -> {
+				LopiModule m = (LopiModule) h.a;
+				if (m instanceof EasyPvpModule) {
+					EasyPvpModule.setEazz(!m.isEnabled());
+				} else {
+					ModuleManager.toggle(m);
+				}
+			}
+			case H_RUN -> {
+				ShortcutsModule.run(this.minecraft, (ShortcutsModule.Entry) h.a);
+				this.onClose();
+			}
+			case H_EDIT -> this.minecraft.gui.setScreen(new ShortcutEditScreen(this, (ShortcutsModule.Entry) h.a));
+			case H_ADD -> this.minecraft.gui.setScreen(new ShortcutEditScreen(this, null));
+			case H_MODE -> {
+				PerformanceModule p = PerformanceModule.get();
+				if (p != null) {
+					p.select(this.minecraft, (Integer) h.a);
+				}
+			}
 			case H_EXPAND -> expanded.merge((LopiModule) h.a, true, (o, n) -> !o);
 			case H_BOOL -> {
 				((Setting<?>) h.a).toggle();
@@ -748,6 +972,10 @@ public class ClickGuiScreen extends Screen {
 			}
 			return super.keyPressed(event);
 		}
+		if (key == GLFW.GLFW_KEY_F8 && LopiKeys.rightShiftDown()) {
+			this.onClose();
+			return true;
+		}
 		switch (key) {
 			case GLFW.GLFW_KEY_ESCAPE -> this.onClose();
 			case GLFW.GLFW_KEY_DOWN -> scrollTarget += 28;
@@ -755,11 +983,10 @@ public class ClickGuiScreen extends Screen {
 			case GLFW.GLFW_KEY_PAGE_DOWN -> scrollTarget += ch - 20;
 			case GLFW.GLFW_KEY_PAGE_UP -> scrollTarget -= ch - 20;
 			case GLFW.GLFW_KEY_LEFT, GLFW.GLFW_KEY_RIGHT -> {
-				int i = categories.indexOf(selected);
-				if (i >= 0 && query.isBlank() && !categories.isEmpty()) {
-					int n = categories.size();
-					selected = categories.get((i + (key == GLFW.GLFW_KEY_RIGHT ? 1 : n - 1)) % n);
-					dirty = true;
+				if (query.isBlank()) {
+					Tab[] tabs = Tab.values();
+					int n = tabs.length;
+					selected = tabs[(selected.ordinal() + (key == GLFW.GLFW_KEY_RIGHT ? 1 : n - 1)) % n];
 					scrollTarget = 0;
 					scroll = 0;
 					catFade = 0f;

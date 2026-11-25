@@ -1,6 +1,7 @@
 package com.lopi.client.mixin;
 
 import com.lopi.client.modules.AutoGgModule;
+import com.lopi.client.modules.CrosshairModule;
 import com.lopi.client.modules.EasyPvpModule;
 import com.lopi.client.modules.ItemOutlineModule;
 import com.lopi.client.modules.UiModule;
@@ -24,6 +25,14 @@ public abstract class HudMixin {
 							  Player player, ItemStack stack, int seed, CallbackInfo ci) {
 		if (!stack.isEmpty() && ItemOutlineModule.hotbarEnabled()) {
 			graphics.outline(x - 1, y - 1, 18, 18, ItemOutlineModule.colorFor(stack));
+		}
+	}
+
+	@Inject(method = "extractCrosshair", at = @At("HEAD"), cancellable = true)
+	private void lopi$crosshair(GuiGraphicsExtractor graphics, DeltaTracker tracker, CallbackInfo ci) {
+		if (CrosshairModule.replacesVanilla()) {
+			CrosshairModule.renderHud(graphics);
+			ci.cancel();
 		}
 	}
 

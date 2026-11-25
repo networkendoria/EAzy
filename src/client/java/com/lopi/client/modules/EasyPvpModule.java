@@ -62,6 +62,34 @@ public final class EasyPvpModule extends LopiModule {
 		};
 	}
 
+	/** Parçacıkları bu modül mü kapattı (EAzz kapanınca geri açılsın diye). */
+	private boolean forcedParticlesOff;
+
+	/**
+	 * EAzz anahtarı: açılınca parçacıkları kapatır, totem sayacını açar, kozmetik + isim etiketini gösterir;
+	 * kapanınca kendi kapattığı parçacıkları geri açar.
+	 */
+	public static void setEazz(boolean on) {
+		EasyPvpModule m = instance;
+		if (m == null) {
+			return;
+		}
+		ModuleManager.setEnabled(m, on);
+		LopiModule particles = particlesModule();
+		if (on) {
+			m.totemCounter.set(true);
+			if (particles != null && !particles.isEnabled()) {
+				ModuleManager.setEnabled(particles, true);
+				m.forcedParticlesOff = true;
+				Minecraft.getInstance().particleEngine.clearParticles();
+			}
+		} else if (m.forcedParticlesOff && particles != null) {
+			ModuleManager.setEnabled(particles, false);
+			m.forcedParticlesOff = false;
+		}
+		ModuleManager.saveAsync();
+	}
+
 	public Setting<Boolean> totemCounterSetting() {
 		return totemCounter;
 	}
@@ -145,13 +173,13 @@ public final class EasyPvpModule extends LopiModule {
 			forget();
 			trackedLevel = level;
 		}
+		// İsim etiketi her zaman görünür; kozmetik açıksa etiketin üstünde yer alır.
+		updateNameTag(level, player);
 		Item item = itemFor(cosmetic());
 		if (item != null) {
-			removeNameTag(level);
 			updateItem(level, player, item);
 		} else {
 			removeItem(level);
-			updateNameTag(level, player);
 		}
 	}
 
@@ -167,7 +195,7 @@ public final class EasyPvpModule extends LopiModule {
 
 	private void updateItem(ClientLevel level, LocalPlayer player, Item cosmetic) {
 		double x = player.getX();
-		double y = player.getY() + player.getBbHeight() + 0.15;
+		double y = player.getY() + player.getBbHeight() + 0.45;
 		double z = player.getZ();
 		if (itemEntity == null || itemEntity.isRemoved() || !itemEntity.getItem().is(cosmetic)) {
 			removeItem(level);
