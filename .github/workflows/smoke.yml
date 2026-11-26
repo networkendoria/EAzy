@@ -21,11 +21,12 @@ jobs:
       - name: run client under xvfb
         run: |
           mkdir -p /tmp/out
-          (xvfb-run -a -s "-screen 0 1280x720x24" bash -c '
+          (LIBGL_ALWAYS_SOFTWARE=1 xvfb-run -a -s "-screen 0 1280x720x24 +extension GLX +render" bash -c '
             ./gradlew runClient --no-daemon > /tmp/out/run.log 2>&1 &
             for t in 25 40 55 70 90 120 150; do
               sleep $((t - ${prev:-0})); prev=$t
-              import -window root /tmp/out/shot_$t.png 2>/dev/null || true
+              xwininfo -root -tree > /tmp/out/win_$t.txt 2>&1 || true
+              xwd -root -silent 2>/dev/null | convert xwd:- /tmp/out/shot_$t.png 2>/dev/null || import -window root /tmp/out/shot_$t.png 2>/dev/null || true
             done
             xdotool key Shift_R+F8 2>/dev/null; sleep 3
             import -window root /tmp/out/shot_menu.png 2>/dev/null || true
