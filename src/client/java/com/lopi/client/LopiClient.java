@@ -8,6 +8,7 @@ import com.lopi.client.modules.CrosshairModule;
 import com.lopi.client.modules.PerformanceModule;
 import com.lopi.client.modules.AutoGgModule;
 import com.lopi.client.modules.EasyPvpModule;
+import com.lopi.client.modules.InfoHudModule;
 import com.lopi.client.modules.ItemOutlineModule;
 import com.lopi.client.modules.NoParticlesModule;
 import com.lopi.client.modules.UiModule;
@@ -40,6 +41,7 @@ public final class LopiClient implements ClientModInitializer {
 		ModuleManager.register(new AutoGgModule());
 		ModuleManager.register(new EasyPvpModule());
 		ModuleManager.register(new CrosshairModule());
+		ModuleManager.register(new InfoHudModule());
 
 		// 2) Kayıtlı ayarları oku ve modüllere uygula
 		ConfigManager.load();

@@ -9,7 +9,8 @@
 		"HudMixin",
 		"AbstractContainerScreenMixin",
 		"ScreenMixin",
-		"ArmorStandInvoker"
+		"ArmorStandInvoker",
+		"LoadingOverlayMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

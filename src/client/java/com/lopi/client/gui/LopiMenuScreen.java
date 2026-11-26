@@ -620,8 +620,29 @@ public class LopiMenuScreen extends Screen {
 		}
 		y += boxH + GAP + 4;
 
+		y = section(g, t("lopi.settings.warnings"), x, y, fade);
+		List<String> warns = warnings(current);
+		if (warns.isEmpty()) {
+			g.text(this.font, fit(t("lopi.warn.none"), w), x, y, alpha(MUTED, fade), false);
+			y += 14;
+		}
+		for (String warn : warns) {
+			List<net.minecraft.util.FormattedCharSequence> wl = this.font.split(Component.literal(warn), w - 20);
+			int wh = wl.size() * 10 + 12;
+			if (inContent(y, y + wh)) {
+				g.fill(x, y, x + w, y + wh, alpha(0xFF6B4A1E, fade));
+				g.fill(x + 1, y + 1, x + w - 1, y + wh - 1, alpha(0xFF1A1620, fade));
+				g.text(this.font, "!", x + 6, y + 6, alpha(0xFFFFC857, fade), false);
+				for (int i = 0; i < wl.size(); i++) {
+					g.text(this.font, wl.get(i), x + 16, y + 6 + i * 10, alpha(TEXT_DIM, fade), false);
+				}
+			}
+			y += wh + 4;
+		}
+		y += GAP;
+
 		y = section(g, t("lopi.settings.modules"), x, y, fade);
-		for (String id : new String[]{"zoom", "no_particles", "ui", "item_outline"}) {
+		for (String id : new String[]{"info_hud", "zoom", "no_particles", "ui", "item_outline"}) {
 			LopiModule m = module(id);
 			if (m != null) {
 				y = drawCard(g, m, x, y, w, top, mx, my, fade, dt) + GAP;
@@ -638,6 +659,24 @@ public class LopiMenuScreen extends Screen {
 			y += 3;
 		}
 		return y;
+	}
+
+	/** Oyuncunun görmesi gereken uyarılar (bellek, mod seçimi, Sodium). */
+	private List<String> warnings(int perfMode) {
+		List<String> list = new ArrayList<>();
+		long mb = Runtime.getRuntime().maxMemory() / (1024L * 1024L);
+		if (mb < 2000) {
+			list.add(Component.translatable("lopi.warn.ram_low", Long.toString(mb)).getString());
+		} else if (perfMode == PerformanceModule.UPS && mb < 3000) {
+			list.add(Component.translatable("lopi.warn.ram_ups", Long.toString(mb)).getString());
+		}
+		if (perfMode < 0) {
+			list.add(t("lopi.warn.mode_none"));
+		}
+		if (!com.lopi.client.core.ModsInfo.isLoaded("sodium")) {
+			list.add(t("lopi.warn.no_sodium"));
+		}
+		return list;
 	}
 
 	private int drawCard(GuiGraphicsExtractor g, LopiModule m, int x, int y, int w, int top, int mx, int my,

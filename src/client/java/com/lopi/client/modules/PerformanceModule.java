@@ -23,14 +23,14 @@ public final class PerformanceModule extends LopiModule {
 	public static final String[] IDS = {"eco", "nm", "ups"};
 
 	private record Profile(int render, int simulation, int maxFps, double entityScale, CloudStatus clouds,
-						   boolean shadows, int biomeBlend, boolean ao, boolean leaves) {
+						   boolean shadows, int biomeBlend, boolean ao, boolean leaves, int mipmap) {
 	}
 
-	/** ECO: en düşük değerler; NM: varsayılanın biraz altı; UPS: yüksek değerler. */
+	/** ECO: en düşük değerler; NM: varsayılanın biraz altı; UPS: yüksek değerler. Son alan: mipmap seviyesi. */
 	private static final Profile[] PROFILES = {
-			new Profile(2, 5, 60, 0.5, CloudStatus.OFF, false, 0, false, false),
-			new Profile(8, 6, 120, 0.75, CloudStatus.OFF, false, 1, false, false),
-			new Profile(16, 10, 120, 1.0, CloudStatus.FAST, true, 2, true, true)
+			new Profile(2, 5, 60, 0.5, CloudStatus.OFF, false, 0, false, false, 0),
+			new Profile(8, 6, 120, 0.75, CloudStatus.OFF, false, 1, false, false, 0),
+			new Profile(16, 10, 120, 1.0, CloudStatus.FAST, true, 2, true, true, 1)
 	};
 
 	private static PerformanceModule instance;
@@ -91,6 +91,7 @@ public final class PerformanceModule extends LopiModule {
 		o.biomeBlendRadius().set(p.biomeBlend());
 		o.ambientOcclusion().set(p.ao());
 		o.cutoutLeaves().set(p.leaves());
+		o.mipmapLevels().set(p.mipmap());
 		o.save();
 		LopiClient.LOGGER.info("Performans modu uygulandı: {}", id);
 	}

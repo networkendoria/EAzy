@@ -3,6 +3,7 @@ package com.lopi.client.mixin;
 import com.lopi.client.modules.AutoGgModule;
 import com.lopi.client.modules.CrosshairModule;
 import com.lopi.client.modules.EasyPvpModule;
+import com.lopi.client.modules.InfoHudModule;
 import com.lopi.client.modules.ItemOutlineModule;
 import com.lopi.client.modules.UiModule;
 import net.minecraft.client.DeltaTracker;
@@ -40,6 +41,7 @@ public abstract class HudMixin {
 	private void lopi$numbers(GuiGraphicsExtractor graphics, DeltaTracker tracker, CallbackInfo ci) {
 		AutoGgModule.renderTargetTotems(graphics);
 		EasyPvpModule.renderTotemCounter(graphics);
+		InfoHudModule.render(graphics);
 		if (!UiModule.hotbarNumbers()) {
 			return;
 		}

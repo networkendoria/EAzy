@@ -16,6 +16,9 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FontDescription;
+import net.minecraft.network.chat.Style;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -37,6 +40,17 @@ public final class EasyPvpModule extends LopiModule {
 
 	private static final int ITEM_ENTITY_ID = -742001;
 	private static final int NAME_ENTITY_ID = -742002;
+
+	/** Lopi logosu: assets/lopi/font/logo.json içindeki tek karakterlik yazı tipi (U+E000). */
+	private static final Style LOGO_STYLE = Style.EMPTY.withFont(
+			new FontDescription.Resource(Identifier.fromNamespaceAndPath("lopi", "logo")));
+
+	/** Kendi isim etiketi: [Lopi logosu] oyuncu adı. */
+	private static Component nameTagText(String playerName) {
+		return Component.empty()
+				.append(Component.literal("\uE000").withStyle(LOGO_STYLE))
+				.append(Component.literal(" " + playerName));
+	}
 
 	private final Setting<Boolean> totemCounter = setting("totem_counter", Boolean.class, true);
 	private final Setting<String> cosmetic = setting("cosmetic", String.class, "off").hidden();
@@ -195,7 +209,7 @@ public final class EasyPvpModule extends LopiModule {
 
 	private void updateItem(ClientLevel level, LocalPlayer player, Item cosmetic) {
 		double x = player.getX();
-		double y = player.getY() + player.getBbHeight() + 0.45;
+		double y = player.getY() + player.getBbHeight() + 0.85;
 		double z = player.getZ();
 		if (itemEntity == null || itemEntity.isRemoved() || !itemEntity.getItem().is(cosmetic)) {
 			removeItem(level);
@@ -224,7 +238,7 @@ public final class EasyPvpModule extends LopiModule {
 			entity.setNoGravity(true);
 			entity.setInvulnerable(true);
 			((ArmorStandInvoker) entity).lopi$setMarker(true);
-			entity.setCustomName(Component.literal("› " + player.getName().getString() + " ‹"));
+			entity.setCustomName(nameTagText(player.getName().getString()));
 			entity.setCustomNameVisible(true);
 			level.addEntity(entity);
 			nameEntity = entity;

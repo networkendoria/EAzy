@@ -106,5 +106,17 @@
 	"lopi.mods.installed_list": "Yüklü modlar (%s)",
 	"lopi.mods.installed": "Yüklü",
 	"lopi.mods.missing": "Yüklü değil",
-	"lopi.mods.note": "Lopi bu modları paketlemez; kendin kurarsın."
+	"lopi.mods.note": "Lopi bu modları paketlemez; kendin kurarsın.",
+	"module.lopi.info_hud": "Bilgi göstergesi",
+	"module.lopi.info_hud.desc": "Sol üstte FPS, ping ve istersen koordinat gösterir.",
+	"setting.lopi.info_hud.fps": "FPS göster",
+	"setting.lopi.info_hud.ping": "Ping göster",
+	"setting.lopi.info_hud.coords": "Koordinat göster",
+	"lopi.settings.warnings": "Uyarılar",
+	"lopi.warn.none": "Her şey yolunda, gerekli bir uyarı yok.",
+	"lopi.warn.ram_low": "Oyuna sadece %s MB RAM ayrılmış. Launcher'dan oyun RAM'ini en az 2000 MB yap; yoksa dünya yüklenirken oyun donabilir veya kapanabilir.",
+	"lopi.warn.ram_ups": "UPS modu için en az 3000 MB RAM önerilir (şu an %s MB). Yetmezse NM modunu seç.",
+	"lopi.warn.no_sodium": "Sodium kurulu değil. FPS düşük kalabilir; Modlar sekmesinden önerilen modlara bak.",
+	"lopi.warn.mode_none": "Henüz performans modu seçmedin. Aşağıdan ECO, NM veya UPS seç.",
+	"lopi.settings.memory": "Oyun belleği: %s MB"
 }
