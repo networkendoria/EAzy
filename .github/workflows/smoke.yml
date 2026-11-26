@@ -1,0 +1,42 @@
+name: smoke
+on:
+  push:
+    branches: [smoke]
+jobs:
+  smoke:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-java@v5
+        with:
+          java-version: '25'
+          distribution: 'microsoft'
+      - name: tools
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q xvfb mesa-utils libgl1-mesa-dri libglx-mesa0 imagemagick x11-utils xdotool
+      - run: chmod +x ./gradlew
+      - name: run client under xvfb
+        run: |
+          mkdir -p /tmp/out
+          (xvfb-run -a -s "-screen 0 1280x720x24" bash -c '
+            ./gradlew runClient --no-daemon > /tmp/out/run.log 2>&1 &
+            for t in 25 40 55 70 90 120 150; do
+              sleep $((t - ${prev:-0})); prev=$t
+              import -window root /tmp/out/shot_$t.png 2>/dev/null || true
+            done
+            xdotool key Shift_R+F8 2>/dev/null; sleep 3
+            import -window root /tmp/out/shot_menu.png 2>/dev/null || true
+            pkill -f runClient || true; pkill -f KnotClient || true
+          ') || true
+          cp run/logs/latest.log /tmp/out/latest.log 2>/dev/null || true
+          cp run/crash-reports/* /tmp/out/ 2>/dev/null || true
+      - name: publish results to branch smoke-out
+        if: always()
+        run: |
+          cd /tmp/out && echo "${GITHUB_SHA}" > sha.txt
+          git init -q && git checkout -q -b smoke-out && git config user.name ci && git config user.email ci@example.com
+          git add -A && git commit -q -m smoke
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${GITHUB_REPOSITORY}.git" smoke-out
