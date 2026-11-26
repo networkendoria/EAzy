@@ -1,7 +1,7 @@
 name: smoke
 on:
   push:
-    branches: [smoke]
+    branches: [smoke, smoke-base]
 jobs:
   smoke:
     runs-on: ubuntu-24.04
@@ -33,10 +33,10 @@ jobs:
           ') || true
           cp run/logs/latest.log /tmp/out/latest.log 2>/dev/null || true
           cp run/crash-reports/* /tmp/out/ 2>/dev/null || true
-      - name: publish results to branch smoke-out
+      - name: publish results
         if: always()
         run: |
           cd /tmp/out && echo "${GITHUB_SHA}" > sha.txt
-          git init -q && git checkout -q -b smoke-out && git config user.name ci && git config user.email ci@example.com
+          git init -q && git checkout -q -b out && git config user.name ci && git config user.email ci@example.com
           git add -A && git commit -q -m smoke
-          git push -f "https://x-access-token:${{ github.token }}@github.com/${GITHUB_REPOSITORY}.git" smoke-out
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${GITHUB_REPOSITORY}.git" out:smoke-out-${GITHUB_REF_NAME}
