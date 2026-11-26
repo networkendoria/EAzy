@@ -146,6 +146,11 @@ public class LopiMenuScreen extends Screen {
 	private Hit pressed;
 	private double pressY;
 	private boolean dragScrolled;
+	// Kaydırma çubuğu sürükleme
+	private boolean barDragging;
+	private float barGrab;
+	private int barHitX1, barHitX2, barTrackTop, barTrackH, barThumbH, barThumbY;
+	private float barMax;
 	private Hit sliderHit;
 	private KeyMapping listening;
 
@@ -435,11 +440,21 @@ public class LopiMenuScreen extends Screen {
 		g.disableScissor();
 
 		// Kaydırma çubuğu
+		barMax = max;
+		barHitX1 = barHitX2 = 0;
 		if (max > 0f) {
 			int trackH = h - 8;
 			int barH = Math.max(14, Math.round(trackH * (h / (contentHeight + 8f))));
 			int barY = top + 4 + Math.round((trackH - barH) * (scroll / max));
-			g.fill(cx + cw - 4, barY, cx + cw - 2, barY + barH, alpha(ACCENT, ga * 0.7f));
+			boolean hot = barDragging || (mx >= cx + cw - 12 && mx <= cx + cw && my >= top && my <= top + h);
+			g.fill(cx + cw - 5, top + 4, cx + cw - 1, top + 4 + trackH, alpha(0xFF1C1926, ga * (hot ? 0.9f : 0.5f)));
+			g.fill(cx + cw - 5, barY, cx + cw - 1, barY + barH, alpha(hot ? LAVENDER : ACCENT, ga * 0.9f));
+			barHitX1 = cx + cw - 12;
+			barHitX2 = cx + cw;
+			barTrackTop = top + 4;
+			barTrackH = trackH;
+			barThumbH = barH;
+			barThumbY = barY;
 		}
 		if (listening != null) {
 			String hint = t("lopi.gui.key_hint");
@@ -883,6 +898,17 @@ public class LopiMenuScreen extends Screen {
 		if (event.button() != 0) {
 			return true;
 		}
+		if (barHitX2 > 0 && barMax > 0f && mx >= barHitX1 && mx <= barHitX2
+				&& my >= barTrackTop && my <= barTrackTop + barTrackH) {
+			barDragging = true;
+			if (my >= barThumbY && my <= barThumbY + barThumbH) {
+				barGrab = (float) (my - barThumbY);
+			} else {
+				barGrab = barThumbH / 2f;
+				dragBarTo(my);
+			}
+			return true;
+		}
 		Hit h = hitAt(mx, my);
 		pressed = h;
 		pressY = my;
@@ -895,8 +921,19 @@ public class LopiMenuScreen extends Screen {
 		return true;
 	}
 
+	private void dragBarTo(double my) {
+		float range = Math.max(1, barTrackH - barThumbH);
+		float t = (float) ((my - barGrab - barTrackTop) / range);
+		scrollTarget = Math.max(0f, Math.min(barMax, t * barMax));
+		scroll = scrollTarget;
+	}
+
 	@Override
 	public boolean mouseDragged(MouseButtonEvent event, double dx, double dy) {
+		if (barDragging) {
+			dragBarTo(event.y());
+			return true;
+		}
 		if (sliderHit != null) {
 			updateSlider(sliderHit, event.x());
 			return true;
@@ -914,6 +951,10 @@ public class LopiMenuScreen extends Screen {
 
 	@Override
 	public boolean mouseReleased(MouseButtonEvent event) {
+		if (barDragging) {
+			barDragging = false;
+			return true;
+		}
 		Hit h = pressed;
 		pressed = null;
 		if (sliderHit != null) {
