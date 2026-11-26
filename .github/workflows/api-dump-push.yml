@@ -1,0 +1,32 @@
+name: api-dump-push
+on:
+  push:
+    branches: [dump]
+jobs:
+  dump:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-java@v5
+        with:
+          java-version: '25'
+          distribution: 'microsoft'
+      - run: chmod +x ./gradlew
+      - run: ./gradlew compileClientJava --no-daemon -q || true
+      - name: javap
+        run: |
+          mkdir -p /tmp/out
+          JARS=$(find ~/.gradle "$GITHUB_WORKSPACE/.gradle" -name '*.jar' 2>/dev/null | grep -i -E 'minecraft' | grep -v -E 'sources|fabric-loader' || true)
+          FLAGS="-p"; grep -q '^#bytecode' dump-classes.txt && FLAGS="-p -c"
+          for c in $(grep -v '^#' dump-classes.txt); do
+            echo "################ $c" >> /tmp/out/dump.txt
+            F=0
+            for j in $JARS; do javap $FLAGS -cp "$j" "$c" >> /tmp/out/dump.txt 2>/dev/null && { F=1; break; }; done
+            [ $F = 0 ] && echo BULUNAMADI >> /tmp/out/dump.txt
+          done
+          echo "$GITHUB_SHA" > /tmp/out/sha.txt
+          cd /tmp/out && git init -q && git checkout -q -b dump-out && git config user.name ci && git config user.email ci@example.com
+          git add -A && git commit -q -m dump
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${GITHUB_REPOSITORY}.git" dump-out

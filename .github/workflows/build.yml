@@ -19,7 +19,9 @@ jobs:
       - name: make gradle wrapper executable
         run: chmod +x ./gradlew
       - name: build
-        run: ./gradlew build
+        run: |
+          set -o pipefail
+          ./gradlew build --no-daemon 2>&1 | tee build.log
       - name: name the jar Lopi.jar
         run: cp "$(ls build/libs/*.jar | grep -v -- '-sources.jar' | head -1)" Lopi.jar
       - name: capture build artifacts
@@ -34,3 +36,13 @@ jobs:
         run: |
           gh release delete latest --cleanup-tag --yes || true
           gh release create latest Lopi.jar --title "Lopi (son derleme)" --notes "Commit ${GITHUB_SHA::7}" --target "$GITHUB_SHA"
+      - name: write build log to branch ci-log
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p /tmp/cilog && cp build.log /tmp/cilog/build.log 2>/dev/null || echo "log yok" > /tmp/cilog/build.log
+          echo "${GITHUB_SHA} job=${{ job.status }}" > /tmp/cilog/status.txt
+          cd /tmp/cilog && git init -q && git checkout -q -b ci-log && git config user.name ci && git config user.email ci@example.com
+          git add -A && git commit -q -m "log ${GITHUB_SHA::7} ${{ job.status }}"
+          git push -f "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" ci-log
