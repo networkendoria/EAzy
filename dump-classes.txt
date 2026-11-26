@@ -1,6 +1,5 @@
+#bytecode
 net.minecraft.client.gui.screens.LoadingOverlay
-net.minecraft.network.chat.Style
-net.minecraft.network.chat.FontDescription
-net.minecraft.client.Options
-net.minecraft.client.OptionInstance
-net.minecraft.client.renderer.entity.EntityRenderer
+net.minecraft.network.chat.FontDescription$Resource
+net.minecraft.client.gui.GuiGraphicsExtractor
+net.minecraft.client.renderer.texture.TextureManager
